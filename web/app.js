@@ -3,79 +3,115 @@
 // ── DOM refs ────────────────────────────────────────────────────────────────
 const statusDot    = document.getElementById("status-dot");
 const statusLabel  = document.getElementById("status-label");
+const statusMeta   = document.getElementById("status-meta");
+const refreshBtn   = document.getElementById("refresh-btn");
+const apiKeyBtn    = document.getElementById("api-key-btn");
+const apiKeyDialog = document.getElementById("api-key-dialog");
+const apiKeyInput  = document.getElementById("api-key-input");
+const saveApiKeyBtn = document.getElementById("save-api-key-btn");
+const clearApiKeyBtn = document.getElementById("clear-api-key-btn");
+const closeApiKeyBtn = document.getElementById("close-api-key-btn");
 const cmdSearch    = document.getElementById("cmd-search");
+const cmdCount     = document.getElementById("cmd-count");
 const cmdList      = document.getElementById("cmd-list");
 const cmdTitle     = document.getElementById("cmd-title");
 const cmdDesc      = document.getElementById("cmd-desc");
+const cmdMeta      = document.getElementById("cmd-meta");
 const cmdBadgeWrap = document.getElementById("cmd-badge-wrap");
 const argsFields   = document.getElementById("args-fields");
+const safetyNote   = document.getElementById("safety-note");
 const confirmBox   = document.getElementById("confirm-box");
 const confirmWord  = document.getElementById("confirm-word");
 const confirmInput = document.getElementById("confirm-input");
-const runRow       = document.getElementById("run-row");
 const runBtn       = document.getElementById("run-btn");
 const runLabel     = document.getElementById("run-label");
 const runSpinner   = document.getElementById("run-spinner");
 const runHint      = document.getElementById("run-hint");
-const outputWrap   = document.getElementById("output-wrap");
 const outputPlaceholder = document.getElementById("output-placeholder");
 const outputEl     = document.getElementById("output");
 const copyBtn      = document.getElementById("copy-btn");
 const clearBtn     = document.getElementById("clear-btn");
+const resultMeta   = document.getElementById("result-meta");
 const toast        = document.getElementById("toast");
 const dryrunCheck  = document.getElementById("dryrun-check");
 
 // ── State ───────────────────────────────────────────────────────────────────
+const API_KEY_STORAGE = "mqUmsApiKey";
+let apiKey   = localStorage.getItem(API_KEY_STORAGE) || "";
 let commands = [];
 let current  = null;
 let running  = false;
 
 // ── Init ─────────────────────────────────────────────────────────────────────
 async function init() {
+  updateApiKeyButton();
   await checkHealth();
   await loadCommands();
   setInterval(checkHealth, 15000);
 }
 
+function apiHeaders(extra = {}) {
+  return apiKey ? { ...extra, "x-api-key": apiKey } : extra;
+}
+
 async function checkHealth() {
   try {
-    const res = await fetch("/health", { signal: AbortSignal.timeout(4000) });
-    if (res.ok) {
-      statusDot.className = "status-dot ok";
-      statusLabel.textContent = "connected";
-    } else {
-      throw new Error(res.status);
-    }
-  } catch {
+    const res = await fetch("/api/health", { signal: AbortSignal.timeout(4000) });
+    const data = await safeJson(res);
+    if (!res.ok || !data.ok) throw new Error(data.error || res.status);
+
+    statusDot.className = "status-dot ok";
+    statusLabel.textContent = "connected";
+    statusMeta.textContent = `v${data.version} · ${data.commandsLoaded} commands · UMS host ${data.umsHostConfigured ? "configured" : "missing"} · credentials ${data.credentialConfigured ? "configured" : "missing"}`;
+  } catch (err) {
     statusDot.className = "status-dot error";
     statusLabel.textContent = "offline";
+    statusMeta.textContent = `API offline or unreachable: ${err.message}`;
   }
 }
 
 async function loadCommands() {
+  cmdCount.textContent = "Loading commands…";
   try {
-    const res = await fetch("/api/commands");
-    const data = await res.json();
+    const res = await fetch("/api/commands", { headers: apiHeaders() });
+    const data = await safeJson(res);
+    if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+
     commands = data.commands || [];
     renderSidebar(commands);
+    cmdCount.textContent = `${commands.length} commands loaded`;
+
+    if (commands.length && !current) {
+      const firstReadOnly = commands.find(c => !c.danger) || commands[0];
+      selectCommand(firstReadOnly.id);
+    }
   } catch (err) {
+    commands = [];
+    cmdList.innerHTML = `<div class="empty-state">Failed to load commands.<br>${escHtml(err.message)}</div>`;
+    cmdCount.textContent = "No commands loaded";
     showToast(`Failed to load commands: ${err.message}`);
   }
+}
+
+async function safeJson(res) {
+  try { return await res.json(); }
+  catch { return {}; }
 }
 
 // ── Sidebar ──────────────────────────────────────────────────────────────────
 function renderSidebar(cmds) {
   cmdList.innerHTML = "";
 
-  const safe    = cmds.filter(c => !c.danger);
+  if (!cmds.length) {
+    cmdList.innerHTML = `<div class="empty-state">No matching commands</div>`;
+    return;
+  }
+
+  const safe = cmds.filter(c => !c.danger);
   const dangerous = cmds.filter(c => c.danger);
 
-  if (safe.length) {
-    addGroup("Read-only", safe);
-  }
-  if (dangerous.length) {
-    addGroup("Write / Danger", dangerous);
-  }
+  if (safe.length) addGroup("Read-only", safe);
+  if (dangerous.length) addGroup("Write / Danger", dangerous);
 }
 
 function addGroup(label, cmds) {
@@ -85,7 +121,8 @@ function addGroup(label, cmds) {
   cmdList.appendChild(lbl);
 
   for (const cmd of cmds) {
-    const item = document.createElement("div");
+    const item = document.createElement("button");
+    item.type = "button";
     item.className = "cmd-item";
     item.dataset.id = cmd.id;
 
@@ -105,15 +142,16 @@ function addGroup(label, cmds) {
 }
 
 cmdSearch.addEventListener("input", () => {
-  const q = cmdSearch.value.toLowerCase();
+  const q = cmdSearch.value.toLowerCase().trim();
   const filtered = commands.filter(c =>
     c.name.toLowerCase().includes(q) ||
     c.id.toLowerCase().includes(q) ||
     (c.description || "").toLowerCase().includes(q)
   );
   renderSidebar(filtered);
+  cmdCount.textContent = q ? `${filtered.length} matching commands` : `${commands.length} commands loaded`;
   if (current) {
-    const active = cmdList.querySelector(`[data-id="${current.id}"]`);
+    const active = cmdList.querySelector(`[data-id="${CSS.escape(current.id)}"]`);
     if (active) active.classList.add("active");
   }
 });
@@ -123,14 +161,13 @@ function selectCommand(id) {
   current = commands.find(c => c.id === id) || null;
   if (!current) return;
 
-  // Update sidebar active state
   cmdList.querySelectorAll(".cmd-item").forEach(el => {
     el.classList.toggle("active", el.dataset.id === id);
   });
 
-  // Header
   cmdTitle.textContent = current.name;
   cmdDesc.textContent  = current.description || "";
+  cmdMeta.textContent = `${current.id} · ${current.allowedArgs?.length || 0} allowed arg${(current.allowedArgs?.length || 0) === 1 ? "" : "s"}`;
 
   cmdBadgeWrap.innerHTML = "";
   const b = document.createElement("span");
@@ -138,9 +175,24 @@ function selectCommand(id) {
   b.textContent = current.danger ? "⚠ Dangerous" : "Read-only";
   cmdBadgeWrap.appendChild(b);
 
-  // Args
+  renderArgs(current.allowedArgs || []);
+
+  dryrunCheck.checked = current.danger;
+  confirmInput.value = "";
+  updateDryRunState();
+  updateRunBtn();
+  clearOutput();
+}
+
+function renderArgs(argNames) {
   argsFields.innerHTML = "";
-  for (const argName of current.allowedArgs || []) {
+
+  if (!argNames.length) {
+    argsFields.innerHTML = `<div class="no-args">No arguments required.</div>`;
+    return;
+  }
+
+  for (const argName of argNames) {
     const g = document.createElement("div");
     g.className = "arg-group";
 
@@ -154,31 +206,13 @@ function selectCommand(id) {
     inp.id   = "arg-" + argName;
     inp.className = "arg-input";
     inp.dataset.argName = argName;
-    inp.placeholder = argName;
+    inp.placeholder = `Enter ${argName}`;
     inp.addEventListener("input", updateRunBtn);
 
     g.appendChild(lbl);
     g.appendChild(inp);
     argsFields.appendChild(g);
   }
-
-  // Danger confirm
-  if (current.danger) {
-    confirmBox.classList.remove("hidden");
-    confirmWord.textContent = current.confirmText;
-    confirmInput.value = "";
-    runBtn.classList.add("danger-mode");
-  } else {
-    confirmBox.classList.add("hidden");
-    runBtn.classList.remove("danger-mode");
-  }
-
-  runHint.textContent = current.allowedArgs.length
-    ? `${current.allowedArgs.length} arg${current.allowedArgs.length > 1 ? "s" : ""}`
-    : "No args required";
-
-  updateRunBtn();
-  clearOutput();
 }
 
 function getArgs() {
@@ -190,17 +224,44 @@ function getArgs() {
 }
 
 // ── Run ───────────────────────────────────────────────────────────────────────
+function updateDryRunState() {
+  if (!current) return;
+
+  const liveDanger = current.danger && !dryrunCheck.checked;
+  confirmBox.classList.toggle("hidden", !liveDanger);
+  runBtn.classList.toggle("danger-mode", liveDanger);
+  confirmWord.textContent = current.confirmText || "RUN";
+  runLabel.textContent = dryrunCheck.checked ? "Dry Run" : "Run";
+
+  if (liveDanger) {
+    safetyNote.textContent = "Live execution is enabled for a dangerous command. Confirm deliberately before running.";
+    safetyNote.className = "safety-note danger";
+  } else if (current.danger) {
+    safetyNote.textContent = "Safe preview mode. The API will return the PowerShell command and arguments without executing them.";
+    safetyNote.className = "safety-note warning";
+  } else {
+    safetyNote.textContent = "Read-only command. The API will execute through the allowlisted runner.";
+    safetyNote.className = "safety-note info";
+  }
+}
+
 function updateRunBtn() {
   if (!current || running) { runBtn.disabled = true; return; }
-  if (current.danger && confirmInput.value !== current.confirmText) {
+  if (current.danger && !dryrunCheck.checked && confirmInput.value !== current.confirmText) {
     runBtn.disabled = true; return;
   }
   runBtn.disabled = false;
+
+  runHint.textContent = dryrunCheck.checked
+    ? "Preview only — no UMS change"
+    : current.danger ? "Live UMS change" : "Execute read-only command";
 }
 
 confirmInput.addEventListener("input", updateRunBtn);
 dryrunCheck.addEventListener("change", () => {
-  runLabel.textContent = dryrunCheck.checked ? "Dry Run" : "Run";
+  if (dryrunCheck.checked) confirmInput.value = "";
+  updateDryRunState();
+  updateRunBtn();
 });
 
 async function runCommand() {
@@ -208,34 +269,40 @@ async function runCommand() {
 
   running = true;
   runBtn.disabled = true;
+  const started = performance.now();
   runLabel.textContent = dryrunCheck.checked ? "Previewing" : "Running";
   runSpinner.classList.remove("hidden");
   clearOutput();
   showPlaceholder(false);
 
   const body = { commandId: current.id, args: getArgs(), dryRun: dryrunCheck.checked };
-  if (current.danger) body.confirmText = confirmInput.value;
+  if (current.danger && !dryrunCheck.checked) body.confirmText = confirmInput.value;
 
   try {
     const res = await fetch("/api/run", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: apiHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify(body),
     });
-    const data = await res.json();
+    const data = await safeJson(res);
+    const elapsedMs = Math.round(performance.now() - started);
 
     if (!res.ok) {
       showError(data.error || JSON.stringify(data));
+      resultMeta.textContent = `failed · ${elapsedMs} ms`;
     } else if (data.dryRun) {
-      showJson({ "dry-run": true, preview: data.preview });
+      showJson({ dryRun: true, preview: data.preview });
+      resultMeta.textContent = `dry-run · ${elapsedMs} ms`;
       copyBtn.classList.remove("hidden");
     } else {
       const payload = data.result ?? data.raw ?? data;
       showJson(payload);
+      resultMeta.textContent = `success · ${elapsedMs} ms`;
       copyBtn.classList.remove("hidden");
     }
   } catch (err) {
     showError(`Request failed: ${err.message}`);
+    resultMeta.textContent = "request failed";
   } finally {
     running = false;
     runLabel.textContent = dryrunCheck.checked ? "Dry Run" : "Run";
@@ -245,6 +312,51 @@ async function runCommand() {
 }
 
 runBtn.addEventListener("click", runCommand);
+refreshBtn.addEventListener("click", async () => {
+  await checkHealth();
+  await loadCommands();
+  showToast("API status refreshed");
+});
+
+// ── API key dialog ────────────────────────────────────────────────────────────
+function updateApiKeyButton() {
+  apiKeyBtn.textContent = apiKey ? "API key set" : "API key";
+  apiKeyBtn.classList.toggle("key-set", Boolean(apiKey));
+}
+
+function openApiKeyDialog() {
+  apiKeyInput.value = apiKey;
+  apiKeyDialog.classList.remove("hidden");
+  apiKeyInput.focus();
+}
+
+function closeApiKeyDialog() {
+  apiKeyDialog.classList.add("hidden");
+}
+
+apiKeyBtn.addEventListener("click", openApiKeyDialog);
+closeApiKeyBtn.addEventListener("click", closeApiKeyDialog);
+saveApiKeyBtn.addEventListener("click", async () => {
+  apiKey = apiKeyInput.value.trim();
+  if (apiKey) localStorage.setItem(API_KEY_STORAGE, apiKey);
+  else localStorage.removeItem(API_KEY_STORAGE);
+  updateApiKeyButton();
+  closeApiKeyDialog();
+  await loadCommands();
+  showToast(apiKey ? "API key saved" : "API key cleared");
+});
+clearApiKeyBtn.addEventListener("click", async () => {
+  apiKey = "";
+  apiKeyInput.value = "";
+  localStorage.removeItem(API_KEY_STORAGE);
+  updateApiKeyButton();
+  closeApiKeyDialog();
+  await loadCommands();
+  showToast("API key cleared");
+});
+apiKeyDialog.addEventListener("click", e => {
+  if (e.target === apiKeyDialog) closeApiKeyDialog();
+});
 
 // ── Output ────────────────────────────────────────────────────────────────────
 function showPlaceholder(show) {
@@ -257,6 +369,7 @@ function clearOutput() {
   outputEl.classList.add("hidden");
   outputPlaceholder.style.display = "";
   copyBtn.classList.add("hidden");
+  resultMeta.textContent = "";
 }
 
 function showJson(data) {
@@ -268,7 +381,7 @@ function showJson(data) {
 }
 
 function showError(msg) {
-  outputEl.innerHTML = `<span class="json-err">${escHtml(msg)}</span>`;
+  outputEl.innerHTML = `<span class="json-err">${escHtml(String(msg))}</span>`;
   outputEl.classList.remove("hidden");
   outputPlaceholder.style.display = "none";
   outputEl._rawText = msg;
@@ -293,7 +406,7 @@ function syntaxHighlight(json) {
 }
 
 function escHtml(s) {
-  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 }
 
 // ── Copy ──────────────────────────────────────────────────────────────────────
@@ -325,11 +438,12 @@ document.addEventListener("keydown", e => {
     runCommand();
   }
   if (e.key === "Escape") {
+    if (!apiKeyDialog.classList.contains("hidden")) { closeApiKeyDialog(); return; }
     clearOutput();
     if (confirmInput) confirmInput.value = "";
     updateRunBtn();
   }
-  if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
     e.preventDefault();
     cmdSearch.focus();
     cmdSearch.select();
