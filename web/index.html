@@ -16,8 +16,10 @@
         <span class="logo-sub">IGEL UMS</span>
       </div>
       <div class="topbar-right">
+        <button id="api-key-btn" class="btn-ghost" type="button" title="Configure x-api-key header">API key</button>
         <div id="status-dot" class="status-dot" title="API status"></div>
         <span id="status-label" class="status-label">connecting…</span>
+        <kbd class="hint">⌘K search</kbd>
         <kbd class="hint">⌘↵ run</kbd>
         <kbd class="hint">⎋ clear</kbd>
       </div>
@@ -29,6 +31,7 @@
       <aside id="sidebar">
         <div class="sidebar-search">
           <input type="search" id="cmd-search" placeholder="Filter commands…" autocomplete="off">
+          <div id="cmd-count" class="sidebar-meta">Loading commands…</div>
         </div>
         <div id="cmd-list"></div>
       </aside>
@@ -36,24 +39,36 @@
       <!-- Main panel -->
       <main id="main">
 
+        <!-- API health -->
+        <section id="health-panel" class="health-panel">
+          <div>
+            <div class="section-kicker">Connection</div>
+            <div id="status-meta" class="health-summary">Checking API health…</div>
+          </div>
+          <button id="refresh-btn" class="btn-ghost" type="button">Refresh</button>
+        </section>
+
         <!-- Command header -->
         <div id="cmd-header">
           <div>
+            <div class="section-kicker">Command</div>
             <h2 id="cmd-title">Select a command</h2>
             <p id="cmd-desc"></p>
+            <p id="cmd-meta" class="cmd-meta"></p>
           </div>
           <div id="cmd-badge-wrap"></div>
         </div>
 
         <!-- Args -->
         <div id="args-panel">
+          <div id="safety-note" class="safety-note hidden"></div>
           <div id="args-fields"></div>
 
           <!-- Danger confirm -->
           <div id="confirm-box" class="hidden">
             <div class="confirm-inner">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1L15 14H1L8 1Z" stroke="#f85149" stroke-width="1.5" fill="none"/><line x1="8" y1="6" x2="8" y2="9.5" stroke="#f85149" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="12" r=".75" fill="#f85149"/></svg>
-              <span>Dangerous operation — type <code id="confirm-word"></code> to continue</span>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 1L15 14H1L8 1Z" stroke="#f85149" stroke-width="1.5" fill="none"/><line x1="8" y1="6" x2="8" y2="9.5" stroke="#f85149" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="12" r=".75" fill="#f85149"/></svg>
+              <span>Live dangerous operation — type <code id="confirm-word"></code> to continue</span>
               <input type="text" id="confirm-input" autocomplete="off" spellcheck="false">
             </div>
           </div>
@@ -74,7 +89,10 @@
         <!-- Output -->
         <div id="output-panel">
           <div class="output-toolbar">
-            <span class="output-title">Output</span>
+            <div>
+              <span class="output-title">Output</span>
+              <span id="result-meta" class="result-meta"></span>
+            </div>
             <div class="output-actions">
               <button id="copy-btn" class="btn-ghost hidden">Copy</button>
               <button id="clear-btn" class="btn-ghost">Clear</button>
@@ -82,8 +100,8 @@
           </div>
           <div id="output-wrap">
             <div id="output-placeholder">
-              <svg width="40" height="40" viewBox="0 0 40 40" fill="none" opacity=".25"><rect x="6" y="10" width="28" height="3" rx="1.5" fill="currentColor"/><rect x="6" y="18" width="20" height="3" rx="1.5" fill="currentColor"/><rect x="6" y="26" width="24" height="3" rx="1.5" fill="currentColor"/></svg>
-              <p>Run a command to see output here</p>
+              <svg width="40" height="40" viewBox="0 0 40 40" fill="none" opacity=".25" aria-hidden="true"><rect x="6" y="10" width="28" height="3" rx="1.5" fill="currentColor"/><rect x="6" y="18" width="20" height="3" rx="1.5" fill="currentColor"/><rect x="6" y="26" width="24" height="3" rx="1.5" fill="currentColor"/></svg>
+              <p>Choose a command, review the risk, then run or dry-run it.</p>
             </div>
             <pre id="output" class="hidden"></pre>
           </div>
@@ -91,6 +109,20 @@
 
       </main>
 
+    </div>
+  </div>
+
+  <!-- API key dialog -->
+  <div id="api-key-dialog" class="dialog-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="api-key-title">
+    <div class="dialog">
+      <h3 id="api-key-title">API key</h3>
+      <p class="dialog-text">If MQ_UMS_API_KEY is enabled on the server, paste the key here. It is stored only in this browser.</p>
+      <input type="password" id="api-key-input" class="dialog-input" autocomplete="off" spellcheck="false" placeholder="x-api-key">
+      <div class="dialog-actions">
+        <button id="clear-api-key-btn" class="btn-ghost" type="button">Clear</button>
+        <button id="close-api-key-btn" class="btn-ghost" type="button">Cancel</button>
+        <button id="save-api-key-btn" type="button">Save</button>
+      </div>
     </div>
   </div>
 
