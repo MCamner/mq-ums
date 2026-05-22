@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node server/src/index.js",
     "dev": "node --watch server/src/index.js",
-    "validate": "node server/src/validate-config.js"
+    "validate": "node server/src/validate-config.js",
+    "validate:commands": "node server/src/validate-config.js"
   },
   "dependencies": {
     "express": "^4.18.2",

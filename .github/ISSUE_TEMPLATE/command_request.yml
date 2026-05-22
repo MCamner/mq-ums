@@ -1,0 +1,50 @@
+name: Command request
+description: Request a new PSIGEL/UMS command for the allowlist
+labels: ["command-request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        mq-ums uses a strict command allowlist in `config/commands.json`. New commands must be reviewed before being added.
+  - type: input
+    id: pscommand
+    attributes:
+      label: PSIGEL command name
+      description: The exact PowerShell function name (must follow Verb-Noun pattern).
+      placeholder: "Get-UMSDeviceAttribute"
+    validations:
+      required: true
+  - type: textarea
+    id: purpose
+    attributes:
+      label: What does this command do?
+      description: Describe what the command does and why it's useful in mq-ums.
+    validations:
+      required: true
+  - type: textarea
+    id: args
+    attributes:
+      label: Arguments
+      description: List any arguments the command accepts and what they do.
+      placeholder: |
+        - Id (required): device ID
+        - Filter (optional): output filter
+    validations:
+      required: false
+  - type: dropdown
+    id: danger
+    attributes:
+      label: Is this a write/dangerous operation?
+      description: Dangerous commands modify UMS state and require the user to type RUN.
+      options:
+        - "No — read-only"
+        - "Yes — modifies UMS state"
+    validations:
+      required: true
+  - type: checkboxes
+    id: injection
+    attributes:
+      label: Injection risk check
+      options:
+        - label: I have verified that no argument value could be used to inject arbitrary PowerShell
+          required: true

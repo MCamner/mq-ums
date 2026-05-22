@@ -23,6 +23,7 @@ const outputEl     = document.getElementById("output");
 const copyBtn      = document.getElementById("copy-btn");
 const clearBtn     = document.getElementById("clear-btn");
 const toast        = document.getElementById("toast");
+const dryrunCheck  = document.getElementById("dryrun-check");
 
 // ── State ───────────────────────────────────────────────────────────────────
 let commands = [];
@@ -38,7 +39,7 @@ async function init() {
 
 async function checkHealth() {
   try {
-    const res = await fetch("/api/commands", { signal: AbortSignal.timeout(4000) });
+    const res = await fetch("/health", { signal: AbortSignal.timeout(4000) });
     if (res.ok) {
       statusDot.className = "status-dot ok";
       statusLabel.textContent = "connected";
@@ -198,18 +199,21 @@ function updateRunBtn() {
 }
 
 confirmInput.addEventListener("input", updateRunBtn);
+dryrunCheck.addEventListener("change", () => {
+  runLabel.textContent = dryrunCheck.checked ? "Dry Run" : "Run";
+});
 
 async function runCommand() {
   if (!current || running || runBtn.disabled) return;
 
   running = true;
   runBtn.disabled = true;
-  runLabel.textContent = "Running";
+  runLabel.textContent = dryrunCheck.checked ? "Previewing" : "Running";
   runSpinner.classList.remove("hidden");
   clearOutput();
   showPlaceholder(false);
 
-  const body = { commandId: current.id, args: getArgs() };
+  const body = { commandId: current.id, args: getArgs(), dryRun: dryrunCheck.checked };
   if (current.danger) body.confirmText = confirmInput.value;
 
   try {
@@ -222,6 +226,9 @@ async function runCommand() {
 
     if (!res.ok) {
       showError(data.error || JSON.stringify(data));
+    } else if (data.dryRun) {
+      showJson({ "dry-run": true, preview: data.preview });
+      copyBtn.classList.remove("hidden");
     } else {
       const payload = data.result ?? data.raw ?? data;
       showJson(payload);
@@ -231,7 +238,7 @@ async function runCommand() {
     showError(`Request failed: ${err.message}`);
   } finally {
     running = false;
-    runLabel.textContent = "Run";
+    runLabel.textContent = dryrunCheck.checked ? "Dry Run" : "Run";
     runSpinner.classList.add("hidden");
     updateRunBtn();
   }

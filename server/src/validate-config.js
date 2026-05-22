@@ -29,6 +29,11 @@ function validateConfig() {
     if (!cmd.id || typeof cmd.id !== "string") throw new Error(`Command missing 'id': ${JSON.stringify(cmd)}`);
     if (!cmd.psCommand || typeof cmd.psCommand !== "string") throw new Error(`Command '${cmd.id}' missing 'psCommand'`);
     if (!Array.isArray(cmd.allowedArgs)) throw new Error(`Command '${cmd.id}' missing 'allowedArgs' array`);
+    for (const arg of cmd.allowedArgs) {
+      if (typeof arg !== "string" || !/^[A-Za-z]\w{0,63}$/.test(arg)) {
+        throw new Error(`Command '${cmd.id}' has unsafe arg name: '${arg}'`);
+      }
+    }
     if (typeof cmd.danger !== "boolean") throw new Error(`Command '${cmd.id}' missing 'danger' boolean`);
     if (cmd.danger && !cmd.confirmText) throw new Error(`Command '${cmd.id}' is danger but missing 'confirmText'`);
 

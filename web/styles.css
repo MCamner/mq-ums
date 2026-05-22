@@ -224,6 +224,18 @@ kbd.hint {
 
 #run-row { display: flex; align-items: center; gap: 12px; }
 
+.dryrun-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--muted);
+  user-select: none;
+}
+.dryrun-toggle input[type="checkbox"] { accent-color: var(--warn); cursor: pointer; }
+.dryrun-toggle:has(input:checked) { color: var(--warn); }
+
 #run-btn {
   display: flex;
   align-items: center;

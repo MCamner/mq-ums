@@ -12,10 +12,11 @@ Focus: verify the prototype works safely against a real IGEL UMS.
 
 - [ ] Test `Get-UMSStatus`, `Get-UMSFirmware`, `Get-UMSDevice` against live UMS
 - [ ] Verify credential loading and session teardown
-- [ ] Add health endpoint `GET /api/health`
-- [ ] Add dry-run mode (log command without executing)
+- [x] Add health endpoint `GET /health` and `GET /api/health`
+- [x] Add dry-run mode (preview command without executing)
+- [x] Add audit log (`logs/audit-YYYY-MM-DD.jsonl`)
 - [ ] Add `tests/` with config validation smoke tests
-- [ ] Add GitHub Pages landing page
+- [x] Add GitHub Pages landing page
 
 ## Next — v0.2.0
 
@@ -30,7 +31,7 @@ Focus: make it reliable enough for daily use.
 ## Later
 
 - [ ] Role-based command profiles (read-only vs operator)
-- [ ] Audit log
+- [x] Audit log
 - [ ] Multi-UMS support
 - [ ] Webhook notifications on dangerous command execution
 

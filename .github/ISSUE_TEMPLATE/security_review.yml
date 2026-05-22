@@ -1,0 +1,38 @@
+name: Security concern
+description: Report a potential security issue (non-critical — for critical issues see SECURITY.md)
+labels: ["security"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **For critical vulnerabilities** (e.g. remote code execution, credential exposure), please follow the private disclosure process in [SECURITY.md](../../docs/SECURITY.md) instead of filing a public issue.
+
+        This template is for lower-severity security observations, hardening suggestions, and security design questions.
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Describe the security concern. Avoid including exploit details in a public issue.
+    validations:
+      required: true
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      options:
+        - "Command injection"
+        - "Credential exposure"
+        - "Network exposure"
+        - "Input validation"
+        - "Audit / logging gap"
+        - "Dependency vulnerability"
+        - "Hardening suggestion"
+        - "Other"
+    validations:
+      required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested mitigation
+    validations:
+      required: false

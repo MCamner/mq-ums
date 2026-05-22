@@ -10,26 +10,22 @@ Local web UI for managing IGEL UMS via [PSIGEL](https://github.com/MCamner/PSIGE
 Browser UI → Node.js API → PowerShell → PSIGEL → IGEL UMS
 ```
 
-## Install (Windows)
+## Quick start
 
 ```powershell
+git clone https://github.com/MCamner/mq-ums.git C:\mq-ums
 cd C:\mq-ums
 
-# Install PSIGEL and Node deps
 .\scripts\install-windows.ps1
-
-# Save UMS credentials (encrypted with Windows DPAPI)
 .\scripts\New-UmsCredential.ps1 -Path C:\mq-ums\ums.cred.xml
 
-# Configure
 copy .env.example .env
 notepad .env   # set MQ_UMS_HOST and MQ_UMS_CRED_PATH
 
-# Start
 npm start
 ```
 
-Open `http://127.0.0.1:8787`.
+Open `http://127.0.0.1:8787`. Verify connectivity at `http://127.0.0.1:8787/health`.
 
 ## Usage
 
@@ -78,6 +74,7 @@ See [ROADMAP.md](ROADMAP.md).
 
 ## Documentation
 
+- [Command reference](docs/COMMANDS.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Security](docs/SECURITY.md)
 - [PSIGEL Notes](docs/PSIGEL_NOTES.md)

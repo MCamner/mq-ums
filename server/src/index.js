@@ -3,15 +3,18 @@
 require("dotenv").config({ path: require("path").resolve(__dirname, "../../.env") });
 
 const express = require("express");
+const fs = require("fs");
 const path = require("path");
 const { spawn } = require("child_process");
 const { validateConfig } = require("./validate-config");
+const { writeAuditEntry } = require("./audit");
 
 const HOST = process.env.MQ_UMS_BIND || "127.0.0.1";
 const PORT = parseInt(process.env.MQ_UMS_HTTP_PORT || "8787", 10);
 const API_KEY = process.env.MQ_UMS_API_KEY || "";
 const SCRIPTS_DIR = path.resolve(__dirname, "../../scripts");
 const WEB_DIR = path.resolve(__dirname, "../../web");
+const VERSION = fs.readFileSync(path.resolve(__dirname, "../../VERSION"), "utf8").trim();
 
 let commandMap;
 try {
@@ -34,6 +37,20 @@ function requireApiKey(req, res, next) {
   next();
 }
 
+function healthPayload() {
+  return {
+    ok: true,
+    version: VERSION,
+    bind: HOST,
+    commandsLoaded: commandMap.size,
+    credentialConfigured: Boolean(process.env.MQ_UMS_CRED_PATH),
+    umsHostConfigured: Boolean(process.env.MQ_UMS_HOST),
+  };
+}
+
+app.get("/health", (req, res) => res.json(healthPayload()));
+app.get("/api/health", (req, res) => res.json(healthPayload()));
+
 app.get("/api/commands", requireApiKey, (req, res) => {
   const list = Array.from(commandMap.values()).map(({ id, name, description, allowedArgs, danger, confirmText }) => ({
     id, name, description, allowedArgs, danger, ...(confirmText ? { confirmText } : {}),
@@ -42,7 +59,7 @@ app.get("/api/commands", requireApiKey, (req, res) => {
 });
 
 app.post("/api/run", requireApiKey, (req, res) => {
-  const { commandId, args = {}, confirmText } = req.body;
+  const { commandId, args = {}, confirmText, dryRun = false } = req.body;
 
   if (!commandId || typeof commandId !== "string") {
     return res.status(400).json({ error: "Missing commandId" });
@@ -64,7 +81,6 @@ app.post("/api/run", requireApiKey, (req, res) => {
   for (const key of cmd.allowedArgs) {
     if (args[key] !== undefined) {
       const val = String(args[key]);
-      // Only allow safe characters in arg values
       if (!/^[\w\s.,@:/\\-]{0,256}$/.test(val)) {
         return res.status(400).json({ error: `Unsafe value for arg '${key}'` });
       }
@@ -72,8 +88,28 @@ app.post("/api/run", requireApiKey, (req, res) => {
     }
   }
 
+  if (dryRun) {
+    writeAuditEntry({
+      commandId,
+      psCommand: cmd.psCommand,
+      args: filteredArgs,
+      dangerous: cmd.danger,
+      dryRun: true,
+      status: "dry-run",
+    });
+    return res.json({
+      ok: true,
+      dryRun: true,
+      preview: {
+        command: cmd.psCommand,
+        args: filteredArgs,
+      },
+    });
+  }
+
   const scriptPath = path.join(SCRIPTS_DIR, "Invoke-UmsCommand.ps1");
   const argsJson = JSON.stringify(filteredArgs);
+  const start = Date.now();
 
   const ps = spawn("pwsh", [
     "-NonInteractive",
@@ -93,9 +129,12 @@ app.post("/api/run", requireApiKey, (req, res) => {
   ps.stderr.on("data", (d) => { stderr += d.toString(); });
 
   ps.on("close", (code) => {
+    const durationMs = Date.now() - start;
     if (code !== 0) {
+      writeAuditEntry({ commandId, psCommand: cmd.psCommand, args: filteredArgs, dangerous: cmd.danger, dryRun: false, status: "error", durationMs });
       return res.status(500).json({ error: "PowerShell runner failed", stderr: stderr.trim(), code });
     }
+    writeAuditEntry({ commandId, psCommand: cmd.psCommand, args: filteredArgs, dangerous: cmd.danger, dryRun: false, status: "success", durationMs });
     try {
       const result = JSON.parse(stdout);
       res.json({ ok: true, result });
@@ -105,12 +144,13 @@ app.post("/api/run", requireApiKey, (req, res) => {
   });
 
   ps.on("error", (err) => {
+    writeAuditEntry({ commandId, psCommand: cmd.psCommand, args: filteredArgs, dangerous: cmd.danger, dryRun: false, status: "spawn-error" });
     res.status(500).json({ error: `Failed to spawn PowerShell: ${err.message}` });
   });
 });
 
 app.listen(PORT, HOST, () => {
-  console.log(`mq-ums running at http://${HOST}:${PORT}`);
+  console.log(`mq-ums v${VERSION} running at http://${HOST}:${PORT}`);
   console.log(`UMS host: ${process.env.MQ_UMS_HOST || "(not set)"}`);
   console.log(`API key:  ${API_KEY ? "enabled" : "disabled"}`);
 });
