@@ -15,7 +15,7 @@ Focus: verify the prototype works safely against a real IGEL UMS.
 - [x] Add health endpoint `GET /health` and `GET /api/health`
 - [x] Add dry-run mode (preview command without executing)
 - [x] Add audit log (`logs/audit-YYYY-MM-DD.jsonl`)
-- [ ] Add `tests/` with config validation smoke tests
+- [x] Add `tests/` with config validation smoke tests
 - [x] Add GitHub Pages landing page
 
 ## Next — v0.2.0

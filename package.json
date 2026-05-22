@@ -1,11 +1,12 @@
 {
   "name": "mq-ums",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "IGEL UMS management web interface via PSIGEL",
   "main": "server/src/index.js",
   "scripts": {
     "start": "node server/src/index.js",
     "dev": "node --watch server/src/index.js",
+    "test": "node --test tests/validate-config.test.js tests/api.test.js",
     "validate": "node server/src/validate-config.js",
     "validate:commands": "node server/src/validate-config.js"
   },

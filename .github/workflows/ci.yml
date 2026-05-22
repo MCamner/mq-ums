@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  validate:
+  test:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,3 +22,6 @@ jobs:
 
       - name: Validate commands.json
         run: node server/src/validate-config.js
+
+      - name: Run tests
+        run: npm test

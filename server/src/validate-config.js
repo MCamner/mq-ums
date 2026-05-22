@@ -5,10 +5,10 @@ const path = require("path");
 
 const CONFIG_PATH = path.resolve(__dirname, "../../config/commands.json");
 
-function validateConfig() {
+function validateConfig(configPath = CONFIG_PATH) {
   let raw;
   try {
-    raw = fs.readFileSync(CONFIG_PATH, "utf8");
+    raw = fs.readFileSync(configPath, "utf8");
   } catch (err) {
     throw new Error(`Cannot read commands.json: ${err.message}`);
   }

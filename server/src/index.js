@@ -70,7 +70,7 @@ app.post("/api/run", requireApiKey, (req, res) => {
     return res.status(404).json({ error: `Unknown command: ${commandId}` });
   }
 
-  if (cmd.danger) {
+  if (cmd.danger && !dryRun) {
     if (confirmText !== cmd.confirmText) {
       return res.status(400).json({ error: `Dangerous command requires confirmText: "${cmd.confirmText}"` });
     }
@@ -149,8 +149,12 @@ app.post("/api/run", requireApiKey, (req, res) => {
   });
 });
 
-app.listen(PORT, HOST, () => {
-  console.log(`mq-ums v${VERSION} running at http://${HOST}:${PORT}`);
-  console.log(`UMS host: ${process.env.MQ_UMS_HOST || "(not set)"}`);
-  console.log(`API key:  ${API_KEY ? "enabled" : "disabled"}`);
-});
+if (require.main === module) {
+  app.listen(PORT, HOST, () => {
+    console.log(`mq-ums v${VERSION} running at http://${HOST}:${PORT}`);
+    console.log(`UMS host: ${process.env.MQ_UMS_HOST || "(not set)"}`);
+    console.log(`API key:  ${API_KEY ? "enabled" : "disabled"}`);
+  });
+}
+
+module.exports = { app };
