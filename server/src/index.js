@@ -52,8 +52,10 @@ app.get("/health", (req, res) => res.json(healthPayload()));
 app.get("/api/health", (req, res) => res.json(healthPayload()));
 
 app.get("/api/commands", requireApiKey, (req, res) => {
-  const list = Array.from(commandMap.values()).map(({ id, name, description, allowedArgs, danger, confirmText }) => ({
-    id, name, description, allowedArgs, danger, ...(confirmText ? { confirmText } : {}),
+  const list = Array.from(commandMap.values()).map(({ id, name, section, description, allowedArgs, danger, confirmText }) => ({
+    id, name, description, allowedArgs, danger,
+    ...(section ? { section } : {}),
+    ...(confirmText ? { confirmText } : {}),
   }));
   res.json({ commands: list });
 });

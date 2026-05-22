@@ -107,38 +107,47 @@ function renderSidebar(cmds) {
     return;
   }
 
-  const safe = cmds.filter(c => !c.danger);
-  const dangerous = cmds.filter(c => c.danger);
+  // Group by section, preserving order
+  const sections = new Map();
+  for (const cmd of cmds) {
+    const sec = cmd.section || "General";
+    if (!sections.has(sec)) sections.set(sec, []);
+    sections.get(sec).push(cmd);
+  }
 
-  if (safe.length) addGroup("Read-only", safe);
-  if (dangerous.length) addGroup("Write / Danger", dangerous);
+  for (const [sectionName, sectionCmds] of sections) {
+    const lbl = document.createElement("div");
+    lbl.className = "cmd-group-label";
+    lbl.textContent = sectionName;
+    cmdList.appendChild(lbl);
+
+    // Read-only first, then dangerous
+    const sorted = [
+      ...sectionCmds.filter(c => !c.danger),
+      ...sectionCmds.filter(c => c.danger),
+    ];
+    for (const cmd of sorted) addCmdItem(cmd);
+  }
 }
 
-function addGroup(label, cmds) {
-  const lbl = document.createElement("div");
-  lbl.className = "cmd-group-label";
-  lbl.textContent = label;
-  cmdList.appendChild(lbl);
+function addCmdItem(cmd) {
+  const item = document.createElement("button");
+  item.type = "button";
+  item.className = "cmd-item";
+  item.dataset.id = cmd.id;
 
-  for (const cmd of cmds) {
-    const item = document.createElement("button");
-    item.type = "button";
-    item.className = "cmd-item";
-    item.dataset.id = cmd.id;
+  const name = document.createElement("span");
+  name.className = "cmd-item-name";
+  name.textContent = cmd.name;
 
-    const name = document.createElement("span");
-    name.className = "cmd-item-name";
-    name.textContent = cmd.name;
+  const badge = document.createElement("span");
+  badge.className = "badge " + (cmd.danger ? "badge-danger" : "badge-read");
+  badge.textContent = cmd.danger ? "write" : "read";
 
-    const badge = document.createElement("span");
-    badge.className = "badge " + (cmd.danger ? "badge-danger" : "badge-read");
-    badge.textContent = cmd.danger ? "write" : "read";
-
-    item.appendChild(name);
-    item.appendChild(badge);
-    item.addEventListener("click", () => selectCommand(cmd.id));
-    cmdList.appendChild(item);
-  }
+  item.appendChild(name);
+  item.appendChild(badge);
+  item.addEventListener("click", () => selectCommand(cmd.id));
+  cmdList.appendChild(item);
 }
 
 cmdSearch.addEventListener("input", () => {

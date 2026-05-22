@@ -2,70 +2,294 @@
   "commands": [
     {
       "id": "get-status",
+      "section": "Status",
       "name": "Get UMS Status",
       "psCommand": "Get-UMSStatus",
       "allowedArgs": [],
       "danger": false,
-      "description": "Returns UMS server status and version information."
+      "description": "Returns UMS server status, version, and build information."
     },
     {
       "id": "get-firmware",
+      "section": "Status",
       "name": "Get Firmware",
       "psCommand": "Get-UMSFirmware",
-      "allowedArgs": [],
+      "allowedArgs": ["Id"],
       "danger": false,
-      "description": "Lists all firmware versions registered in UMS."
+      "description": "Lists all firmware versions registered in UMS. Pass Id to get a specific version."
     },
     {
       "id": "get-device",
+      "section": "Devices",
       "name": "Get Devices",
       "psCommand": "Get-UMSDevice",
-      "allowedArgs": ["Filter"],
+      "allowedArgs": ["Id", "Filter"],
       "danger": false,
-      "description": "Lists all devices. Use Filter=details for extended info."
+      "description": "Lists devices. Pass Id for a single device. Filter: short (default) | details | online | shadow | deviceattributes | networkadapters."
     },
     {
-      "id": "get-profile",
-      "name": "Get Profiles",
-      "psCommand": "Get-UMSProfile",
-      "allowedArgs": [],
-      "danger": false,
-      "description": "Lists all profiles registered in UMS."
+      "id": "start-device",
+      "section": "Devices",
+      "name": "Start Device (Wake-on-LAN)",
+      "psCommand": "Start-UMSDevice",
+      "allowedArgs": ["Id"],
+      "danger": true,
+      "confirmText": "RUN",
+      "description": "Sends a wake-on-LAN command to a device. Requires device Id."
     },
     {
-      "id": "get-directory",
-      "name": "Get Directories",
-      "psCommand": "Get-UMSDirectory",
-      "allowedArgs": [],
-      "danger": false,
-      "description": "Lists UMS directory structure."
+      "id": "stop-device",
+      "section": "Devices",
+      "name": "Stop Device",
+      "psCommand": "Stop-UMSDevice",
+      "allowedArgs": ["Id"],
+      "danger": true,
+      "confirmText": "RUN",
+      "description": "Shuts down a device. Requires device Id."
     },
     {
       "id": "restart-device",
+      "section": "Devices",
       "name": "Restart Device",
       "psCommand": "Restart-UMSDevice",
       "allowedArgs": ["Id"],
       "danger": true,
       "confirmText": "RUN",
-      "description": "Restarts a device by ID. Requires confirmation."
+      "description": "Restarts a device. Requires device Id."
     },
     {
-      "id": "update-device-firmware",
-      "name": "Update Device Firmware",
-      "psCommand": "Update-UMSDeviceFirmware",
-      "allowedArgs": ["Id", "FirmwareId"],
+      "id": "send-device-settings",
+      "section": "Devices",
+      "name": "Send Device Settings",
+      "psCommand": "Send-UMSDeviceSetting",
+      "allowedArgs": ["Id"],
       "danger": true,
       "confirmText": "RUN",
-      "description": "Assigns a new firmware version to a device. Requires confirmation."
+      "description": "Pushes current profile settings to a device immediately. Requires device Id."
+    },
+    {
+      "id": "update-device",
+      "section": "Devices",
+      "name": "Update Device",
+      "psCommand": "Update-UMSDevice",
+      "allowedArgs": ["Id", "Name", "Site", "Department", "CostCenter", "Comment", "AssetId"],
+      "danger": true,
+      "confirmText": "RUN",
+      "description": "Updates device metadata (Name, Site, Department, CostCenter, Comment, AssetId). Requires device Id."
     },
     {
       "id": "move-device",
+      "section": "Devices",
       "name": "Move Device",
       "psCommand": "Move-UMSDevice",
       "allowedArgs": ["Id", "DestId"],
       "danger": true,
       "confirmText": "RUN",
-      "description": "Moves a device to a different directory. Requires confirmation."
+      "description": "Moves a device to a different directory. Requires device Id and destination directory DestId."
+    },
+    {
+      "id": "remove-device",
+      "section": "Devices",
+      "name": "Remove Device",
+      "psCommand": "Remove-UMSDevice",
+      "allowedArgs": ["Id"],
+      "danger": true,
+      "confirmText": "RUN",
+      "description": "Deletes a device from UMS. Requires device Id. Cannot be undone."
+    },
+    {
+      "id": "reset-device",
+      "section": "Devices",
+      "name": "Reset Device to Factory Defaults",
+      "psCommand": "Reset-UMSDevice",
+      "allowedArgs": ["Id"],
+      "danger": true,
+      "confirmText": "RUN",
+      "description": "Resets a device to factory defaults (2FA reset). Requires device Id. Cannot be undone."
+    },
+    {
+      "id": "get-device-directory",
+      "section": "Device Directories",
+      "name": "Get Device Directories",
+      "psCommand": "Get-UMSDeviceDirectory",
+      "allowedArgs": ["Id", "Filter"],
+      "danger": false,
+      "description": "Lists device directories. Pass Id for a specific directory. Filter: children to include child elements."
+    },
+    {
+      "id": "new-device-directory",
+      "section": "Device Directories",
+      "name": "New Device Directory",
+      "psCommand": "New-UMSDeviceDirectory",
+      "allowedArgs": ["Name"],
+      "danger": true,
+      "confirmText": "RUN",
+      "description": "Creates a new device directory. Requires Name."
+    },
+    {
+      "id": "update-device-directory",
+      "section": "Device Directories",
+      "name": "Rename Device Directory",
+      "psCommand": "Update-UMSDeviceDirectory",
+      "allowedArgs": ["Id", "Name"],
+      "danger": true,
+      "confirmText": "RUN",
+      "description": "Renames a device directory. Requires directory Id and new Name."
+    },
+    {
+      "id": "move-device-directory",
+      "section": "Device Directories",
+      "name": "Move Device Directory",
+      "psCommand": "Move-UMSDeviceDirectory",
+      "allowedArgs": ["Id", "DestId"],
+      "danger": true,
+      "confirmText": "RUN",
+      "description": "Moves a device directory into another parent directory. Requires directory Id and destination DestId."
+    },
+    {
+      "id": "remove-device-directory",
+      "section": "Device Directories",
+      "name": "Remove Device Directory",
+      "psCommand": "Remove-UMSDeviceDirectory",
+      "allowedArgs": ["Id"],
+      "danger": true,
+      "confirmText": "RUN",
+      "description": "Deletes a device directory. Requires directory Id. The directory must be empty."
+    },
+    {
+      "id": "get-profile",
+      "section": "Profiles",
+      "name": "Get Profiles",
+      "psCommand": "Get-UMSProfile",
+      "allowedArgs": ["Id"],
+      "danger": false,
+      "description": "Lists all profiles registered in UMS. Pass Id for a specific profile."
+    },
+    {
+      "id": "update-profile",
+      "section": "Profiles",
+      "name": "Rename Profile",
+      "psCommand": "Update-UMSProfile",
+      "allowedArgs": ["Id", "Name"],
+      "danger": true,
+      "confirmText": "RUN",
+      "description": "Renames a profile. Requires profile Id and new Name."
+    },
+    {
+      "id": "move-profile",
+      "section": "Profiles",
+      "name": "Move Profile",
+      "psCommand": "Move-UMSProfile",
+      "allowedArgs": ["Id", "DestId"],
+      "danger": true,
+      "confirmText": "RUN",
+      "description": "Moves a profile to a different profile directory. Requires profile Id and destination directory DestId."
+    },
+    {
+      "id": "remove-profile",
+      "section": "Profiles",
+      "name": "Remove Profile",
+      "psCommand": "Remove-UMSProfile",
+      "allowedArgs": ["Id"],
+      "danger": true,
+      "confirmText": "RUN",
+      "description": "Deletes a profile from UMS. Requires profile Id. Cannot be undone."
+    },
+    {
+      "id": "get-profile-directory",
+      "section": "Profile Directories",
+      "name": "Get Profile Directories",
+      "psCommand": "Get-UMSProfileDirectory",
+      "allowedArgs": ["Id", "Filter"],
+      "danger": false,
+      "description": "Lists profile directories. Pass Id for a specific directory. Filter: children to include child elements."
+    },
+    {
+      "id": "new-profile-directory",
+      "section": "Profile Directories",
+      "name": "New Profile Directory",
+      "psCommand": "New-UMSProfileDirectory",
+      "allowedArgs": ["Name"],
+      "danger": true,
+      "confirmText": "RUN",
+      "description": "Creates a new profile directory. Requires Name."
+    },
+    {
+      "id": "update-profile-directory",
+      "section": "Profile Directories",
+      "name": "Rename Profile Directory",
+      "psCommand": "Update-UMSProfileDirectory",
+      "allowedArgs": ["Id", "Name"],
+      "danger": true,
+      "confirmText": "RUN",
+      "description": "Renames a profile directory. Requires directory Id and new Name."
+    },
+    {
+      "id": "move-profile-directory",
+      "section": "Profile Directories",
+      "name": "Move Profile Directory",
+      "psCommand": "Move-UMSProfileDirectory",
+      "allowedArgs": ["Id", "DestId"],
+      "danger": true,
+      "confirmText": "RUN",
+      "description": "Moves a profile directory into another parent directory. Requires directory Id and destination DestId."
+    },
+    {
+      "id": "remove-profile-directory",
+      "section": "Profile Directories",
+      "name": "Remove Profile Directory",
+      "psCommand": "Remove-UMSProfileDirectory",
+      "allowedArgs": ["Id"],
+      "danger": true,
+      "confirmText": "RUN",
+      "description": "Deletes a profile directory. Requires directory Id. The directory must be empty."
+    },
+    {
+      "id": "get-device-assignments",
+      "section": "Assignments",
+      "name": "Get Device Assignments",
+      "psCommand": "Get-UMSDeviceAssignment",
+      "allowedArgs": ["Id"],
+      "danger": false,
+      "description": "Lists all profiles currently assigned to a specific device. Requires device Id."
+    },
+    {
+      "id": "get-device-directory-assignments",
+      "section": "Assignments",
+      "name": "Get Device Directory Assignments",
+      "psCommand": "Get-UMSDeviceDirectoryAssignment",
+      "allowedArgs": ["Id"],
+      "danger": false,
+      "description": "Lists all profiles assigned to a device directory. Requires directory Id."
+    },
+    {
+      "id": "get-profile-assignments",
+      "section": "Assignments",
+      "name": "Get Profile Assignments",
+      "psCommand": "Get-UMSProfileAssignment",
+      "allowedArgs": ["Id"],
+      "danger": false,
+      "description": "Lists all devices and directories that a profile is assigned to. Requires profile Id."
+    },
+    {
+      "id": "assign-profile",
+      "section": "Assignments",
+      "name": "Assign Profile",
+      "psCommand": "New-UMSProfileAssignment",
+      "allowedArgs": ["Id", "ReceiverId", "ReceiverType"],
+      "danger": true,
+      "confirmText": "RUN",
+      "description": "Assigns a profile to a device or device directory. Id = profile Id. ReceiverId = target device or directory Id. ReceiverType = tc or tcdirectory."
+    },
+    {
+      "id": "remove-profile-assignment",
+      "section": "Assignments",
+      "name": "Remove Profile Assignment",
+      "psCommand": "Remove-UMSProfileAssignment",
+      "allowedArgs": ["Id", "ReceiverId", "ReceiverType"],
+      "danger": true,
+      "confirmText": "RUN",
+      "description": "Removes a profile assignment from a device or device directory. Id = profile Id. ReceiverId = target Id. ReceiverType = tc or tcdirectory."
     }
   ]
 }

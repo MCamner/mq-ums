@@ -60,15 +60,20 @@ try {
 # Create UMS session
 $webSession = $null
 try {
-    $webSession = New-UMSAPICookie -Hostname $UmsHost -TCPPort $UmsPort -Credential $credential
+    $webSession = New-UMSAPICookie -Computername $UmsHost -TCPPort ([int]$UmsPort) -Credential $credential
 } catch {
     Write-JsonError "Failed to create UMS session: $_"
     exit 1
 }
 
 # Run command
+# Computername and TCPPort are required by all PSIGEL functions alongside WebSession
 try {
-    $splat = @{ WebSession = $webSession }
+    $splat = @{
+        Computername = $UmsHost
+        TCPPort      = [int]$UmsPort
+        WebSession   = $webSession
+    }
     foreach ($key in $cmdArgs.Keys) {
         $splat[$key] = $cmdArgs[$key]
     }
@@ -79,6 +84,6 @@ try {
     Write-JsonError "Command '$PsCommand' failed: $_"
 } finally {
     if ($webSession) {
-        try { Remove-UMSAPICookie -WebSession $webSession } catch {}
+        try { Remove-UMSAPICookie -Computername $UmsHost -TCPPort ([int]$UmsPort) -WebSession $webSession } catch {}
     }
 }
