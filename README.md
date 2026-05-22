@@ -2,11 +2,15 @@
 
 Local web UI for managing IGEL UMS via [PSIGEL](https://github.com/MCamner/PSIGEL).
 
-```
+![CI](https://github.com/MCamner/mq-ums/actions/workflows/ci.yml/badge.svg)
+![Version](https://img.shields.io/badge/version-0.1.1-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+
+```text
 Browser UI → Node.js API → PowerShell → PSIGEL → IGEL UMS
 ```
 
-## Quick start (Windows)
+## Install (Windows)
 
 ```powershell
 cd C:\mq-ums
@@ -14,12 +18,12 @@ cd C:\mq-ums
 # Install PSIGEL and Node deps
 .\scripts\install-windows.ps1
 
-# Save UMS credentials (encrypted, DPAPI)
+# Save UMS credentials (encrypted with Windows DPAPI)
 .\scripts\New-UmsCredential.ps1 -Path C:\mq-ums\ums.cred.xml
 
 # Configure
 copy .env.example .env
-notepad .env
+notepad .env   # set MQ_UMS_HOST and MQ_UMS_CRED_PATH
 
 # Start
 npm start
@@ -27,21 +31,25 @@ npm start
 
 Open `http://127.0.0.1:8787`.
 
+## Usage
+
+1. Select a command from the dropdown
+2. Fill in any required args (e.g. device `Id`)
+3. For dangerous commands (`Restart-*`, `Update-*`, `Move-*`), type `RUN` to confirm
+4. Click **Run** — output appears as JSON
+
+Start with read-only commands: `Get-UMSStatus`, `Get-UMSFirmware`, `Get-UMSDevice`.
+
 ## Configuration
 
 | Variable | Description | Default |
-|---|---|---|
-| `MQ_UMS_HOST` | UMS server hostname | required |
+| --- | --- | --- |
+| `MQ_UMS_HOST` | UMS server hostname or IP | required |
 | `MQ_UMS_PORT` | UMS TCP port | `8443` |
 | `MQ_UMS_CRED_PATH` | Path to credential XML file | required |
 | `MQ_UMS_API_KEY` | Optional API key for the web UI | disabled |
 | `MQ_UMS_BIND` | Bind address | `127.0.0.1` |
 | `MQ_UMS_HTTP_PORT` | HTTP port | `8787` |
-
-## Adding commands
-
-Edit `config/commands.json` and add an entry. Run `npm run validate` to check.
-No code changes needed — the runner is data-driven.
 
 ## Test connectivity
 
@@ -49,23 +57,29 @@ No code changes needed — the runner is data-driven.
 .\scripts\Test-PSIGEL.ps1 -UmsHost ums.example.com -CredPath C:\mq-ums\ums.cred.xml
 ```
 
+## Adding commands
+
+Edit `config/commands.json` and add an entry. Run `npm run validate` to check.
+No code changes needed — the runner is data-driven.
+
 ## Security
 
 - No raw PowerShell from the browser
-- Command allowlist in `config/commands.json`
-- Dangerous commands (`Restart-*`, `Remove-*`, `Update-*`) require typing `RUN`
-- Credentials stored via Windows DPAPI (`Export-Clixml`)
-- Binds to `127.0.0.1` by default
+- Command allowlist enforced in `config/commands.json`
+- Dangerous commands (`Restart-*`, `Remove-*`, `Update-*`, `Move-*`) require typing `RUN`
+- Credentials stored via Windows DPAPI — never in `.env` or plaintext
+- API binds to `127.0.0.1` by default
 
 See [docs/SECURITY.md](docs/SECURITY.md) and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
-## Create GitHub repo
+## Roadmap
 
-```bash
-cd ~/mq-ums
-git init
-git branch -M main
-git add .
-git commit -m "initial mq-ums prototype"
-gh repo create MCamner/mq-ums --private --source . --remote origin --push
-```
+See [ROADMAP.md](ROADMAP.md).
+
+## Documentation
+
+- [Architecture](docs/ARCHITECTURE.md)
+- [Security](docs/SECURITY.md)
+- [PSIGEL Notes](docs/PSIGEL_NOTES.md)
+- [Roadmap](ROADMAP.md)
+- [Changelog](CHANGELOG.md)
