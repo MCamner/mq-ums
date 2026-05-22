@@ -61,8 +61,8 @@ if ($UmsHost -and $CredPath) {
     $credential = Import-Clixml -Path $CredPath
 
     Check "UMS session (New-UMSAPICookie)" {
-        $ws = New-UMSAPICookie -Hostname $UmsHost -TCPPort $UmsPort -Credential $credential
-        Remove-UMSAPICookie -WebSession $ws
+        $ws = New-UMSAPICookie -Computername $UmsHost -TCPPort ([int]$UmsPort) -Credential $credential
+        Remove-UMSAPICookie -Computername $UmsHost -TCPPort ([int]$UmsPort) -WebSession $ws
     }
 }
 
