@@ -3,43 +3,95 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>mq-ums — IGEL UMS Manager</title>
+  <title>mq-ums</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header>
-    <h1>mq-ums</h1>
-    <span class="subtitle">IGEL UMS Management</span>
-  </header>
+  <div id="app">
 
-  <main>
-    <section id="command-section">
-      <label for="command-select">Command</label>
-      <select id="command-select">
-        <option value="">— select command —</option>
-      </select>
-      <p id="command-description" class="description"></p>
-
-      <div id="args-section"></div>
-
-      <div id="confirm-section" class="hidden">
-        <label for="confirm-input">
-          Type <strong id="confirm-word"></strong> to confirm this dangerous operation:
-        </label>
-        <input type="text" id="confirm-input" autocomplete="off" spellcheck="false">
+    <!-- Top bar -->
+    <header id="topbar">
+      <div class="topbar-left">
+        <span class="logo">mq-ums</span>
+        <span class="logo-sub">IGEL UMS</span>
       </div>
-
-      <button id="run-btn" disabled>Run</button>
-    </section>
-
-    <section id="output-section">
-      <div class="output-header">
-        <span>Output</span>
-        <button id="clear-btn" class="small">Clear</button>
+      <div class="topbar-right">
+        <div id="status-dot" class="status-dot" title="API status"></div>
+        <span id="status-label" class="status-label">connecting…</span>
+        <kbd class="hint">⌘↵ run</kbd>
+        <kbd class="hint">⎋ clear</kbd>
       </div>
-      <pre id="output"></pre>
-    </section>
-  </main>
+    </header>
+
+    <div id="layout">
+
+      <!-- Sidebar -->
+      <aside id="sidebar">
+        <div class="sidebar-search">
+          <input type="search" id="cmd-search" placeholder="Filter commands…" autocomplete="off">
+        </div>
+        <div id="cmd-list"></div>
+      </aside>
+
+      <!-- Main panel -->
+      <main id="main">
+
+        <!-- Command header -->
+        <div id="cmd-header">
+          <div>
+            <h2 id="cmd-title">Select a command</h2>
+            <p id="cmd-desc"></p>
+          </div>
+          <div id="cmd-badge-wrap"></div>
+        </div>
+
+        <!-- Args -->
+        <div id="args-panel">
+          <div id="args-fields"></div>
+
+          <!-- Danger confirm -->
+          <div id="confirm-box" class="hidden">
+            <div class="confirm-inner">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1L15 14H1L8 1Z" stroke="#f85149" stroke-width="1.5" fill="none"/><line x1="8" y1="6" x2="8" y2="9.5" stroke="#f85149" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="12" r=".75" fill="#f85149"/></svg>
+              <span>Dangerous operation — type <code id="confirm-word"></code> to continue</span>
+              <input type="text" id="confirm-input" autocomplete="off" spellcheck="false">
+            </div>
+          </div>
+
+          <div id="run-row">
+            <button id="run-btn" disabled>
+              <span id="run-label">Run</span>
+              <span id="run-spinner" class="spinner hidden"></span>
+            </button>
+            <span id="run-hint"></span>
+          </div>
+        </div>
+
+        <!-- Output -->
+        <div id="output-panel">
+          <div class="output-toolbar">
+            <span class="output-title">Output</span>
+            <div class="output-actions">
+              <button id="copy-btn" class="btn-ghost hidden">Copy</button>
+              <button id="clear-btn" class="btn-ghost">Clear</button>
+            </div>
+          </div>
+          <div id="output-wrap">
+            <div id="output-placeholder">
+              <svg width="40" height="40" viewBox="0 0 40 40" fill="none" opacity=".25"><rect x="6" y="10" width="28" height="3" rx="1.5" fill="currentColor"/><rect x="6" y="18" width="20" height="3" rx="1.5" fill="currentColor"/><rect x="6" y="26" width="24" height="3" rx="1.5" fill="currentColor"/></svg>
+              <p>Run a command to see output here</p>
+            </div>
+            <pre id="output" class="hidden"></pre>
+          </div>
+        </div>
+
+      </main>
+
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast"></div>
 
   <script src="app.js"></script>
 </body>
