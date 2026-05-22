@@ -41,7 +41,6 @@ let apiKey   = localStorage.getItem(API_KEY_STORAGE) || "";
 let commands = [];
 let current  = null;
 let running  = false;
-let lastHealth = null;
 
 // ── Init ─────────────────────────────────────────────────────────────────────
 async function init() {
@@ -61,12 +60,10 @@ async function checkHealth() {
     const data = await safeJson(res);
     if (!res.ok || !data.ok) throw new Error(data.error || res.status);
 
-    lastHealth = data;
     statusDot.className = "status-dot ok";
     statusLabel.textContent = "connected";
     statusMeta.textContent = `v${data.version} · ${data.commandsLoaded} commands · UMS host ${data.umsHostConfigured ? "configured" : "missing"} · credentials ${data.credentialConfigured ? "configured" : "missing"}`;
   } catch (err) {
-    lastHealth = null;
     statusDot.className = "status-dot error";
     statusLabel.textContent = "offline";
     statusMeta.textContent = `API offline or unreachable: ${err.message}`;
@@ -180,16 +177,7 @@ function selectCommand(id) {
 
   renderArgs(current.allowedArgs || []);
 
-  if (current.danger) {
-    dryrunCheck.checked = true;
-    safetyNote.textContent = "Dangerous command selected. Dry run is enabled by default; turn it off only when you are ready to execute live.";
-    safetyNote.className = "safety-note warning";
-  } else {
-    dryrunCheck.checked = false;
-    safetyNote.textContent = "Read-only command. Review the output before using it as input for later actions.";
-    safetyNote.className = "safety-note info";
-  }
-
+  dryrunCheck.checked = current.danger;
   confirmInput.value = "";
   updateDryRunState();
   updateRunBtn();
@@ -450,7 +438,7 @@ document.addEventListener("keydown", e => {
     runCommand();
   }
   if (e.key === "Escape") {
-    if (!apiKeyDialog.classList.contains("hidden")) closeApiKeyDialog();
+    if (!apiKeyDialog.classList.contains("hidden")) { closeApiKeyDialog(); return; }
     clearOutput();
     if (confirmInput) confirmInput.value = "";
     updateRunBtn();
