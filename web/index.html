@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>mq-ums — IGEL UMS Manager</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>mq-ums</h1>
+    <span class="subtitle">IGEL UMS Management</span>
+  </header>
+
+  <main>
+    <section id="command-section">
+      <label for="command-select">Command</label>
+      <select id="command-select">
+        <option value="">— select command —</option>
+      </select>
+      <p id="command-description" class="description"></p>
+
+      <div id="args-section"></div>
+
+      <div id="confirm-section" class="hidden">
+        <label for="confirm-input">
+          Type <strong id="confirm-word"></strong> to confirm this dangerous operation:
+        </label>
+        <input type="text" id="confirm-input" autocomplete="off" spellcheck="false">
+      </div>
+
+      <button id="run-btn" disabled>Run</button>
+    </section>
+
+    <section id="output-section">
+      <div class="output-header">
+        <span>Output</span>
+        <button id="clear-btn" class="small">Clear</button>
+      </div>
+      <pre id="output"></pre>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

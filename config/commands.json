@@ -1,0 +1,71 @@
+{
+  "commands": [
+    {
+      "id": "get-status",
+      "name": "Get UMS Status",
+      "psCommand": "Get-UMSStatus",
+      "allowedArgs": [],
+      "danger": false,
+      "description": "Returns UMS server status and version information."
+    },
+    {
+      "id": "get-firmware",
+      "name": "Get Firmware",
+      "psCommand": "Get-UMSFirmware",
+      "allowedArgs": [],
+      "danger": false,
+      "description": "Lists all firmware versions registered in UMS."
+    },
+    {
+      "id": "get-device",
+      "name": "Get Devices",
+      "psCommand": "Get-UMSDevice",
+      "allowedArgs": ["Filter"],
+      "danger": false,
+      "description": "Lists all devices. Use Filter=details for extended info."
+    },
+    {
+      "id": "get-profile",
+      "name": "Get Profiles",
+      "psCommand": "Get-UMSProfile",
+      "allowedArgs": [],
+      "danger": false,
+      "description": "Lists all profiles registered in UMS."
+    },
+    {
+      "id": "get-directory",
+      "name": "Get Directories",
+      "psCommand": "Get-UMSDirectory",
+      "allowedArgs": [],
+      "danger": false,
+      "description": "Lists UMS directory structure."
+    },
+    {
+      "id": "restart-device",
+      "name": "Restart Device",
+      "psCommand": "Restart-UMSDevice",
+      "allowedArgs": ["Id"],
+      "danger": true,
+      "confirmText": "RUN",
+      "description": "Restarts a device by ID. Requires confirmation."
+    },
+    {
+      "id": "update-device-firmware",
+      "name": "Update Device Firmware",
+      "psCommand": "Update-UMSDeviceFirmware",
+      "allowedArgs": ["Id", "FirmwareId"],
+      "danger": true,
+      "confirmText": "RUN",
+      "description": "Assigns a new firmware version to a device. Requires confirmation."
+    },
+    {
+      "id": "move-device",
+      "name": "Move Device",
+      "psCommand": "Move-UMSDevice",
+      "allowedArgs": ["Id", "DestId"],
+      "danger": true,
+      "confirmText": "RUN",
+      "description": "Moves a device to a different directory. Requires confirmation."
+    }
+  ]
+}
