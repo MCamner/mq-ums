@@ -1,6 +1,6 @@
 {
   "name": "mq-ums",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "IGEL UMS management web interface via PSIGEL",
   "main": "server/src/index.js",
   "scripts": {

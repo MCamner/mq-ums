@@ -42,6 +42,16 @@ function validateConfig(configPath = CONFIG_PATH) {
       throw new Error(`Command '${cmd.id}' has unsafe psCommand: '${cmd.psCommand}'`);
     }
 
+    // Only allow known-safe PowerShell verb prefixes — blocks Invoke-*, ForEach-*, etc.
+    const ALLOWED_VERBS = new Set([
+      "Get", "Set", "New", "Remove", "Move",
+      "Start", "Stop", "Restart", "Reset", "Send", "Update",
+    ]);
+    const verb = cmd.psCommand.split("-")[0];
+    if (!ALLOWED_VERBS.has(verb)) {
+      throw new Error(`Command '${cmd.id}' has disallowed psCommand verb '${verb}': use Get/Set/New/Remove/Move/Start/Stop/Restart/Reset/Send/Update`);
+    }
+
     if (ids.has(cmd.id)) throw new Error(`Duplicate command id: '${cmd.id}'`);
     ids.add(cmd.id);
   }

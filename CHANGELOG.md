@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.1.3] - 2026-05-23
+
+### Added
+
+* `## Proof` section in README documenting safety guarantees
+* `release-check.sh` — pre-release gate: config validation, tests, version sync across VERSION/package.json/README/CHANGELOG/docs/index.html
+* `validate-config.js` now enforces an explicit allowed verb set (`Get`, `Set`, `New`, `Remove`, `Move`, `Start`, `Stop`, `Restart`, `Reset`, `Send`, `Update`) — blocks any psCommand with an unlisted verb prefix
+* CI `workflow_dispatch` trigger for manual runs
+* CI docs-consistency job: version match across VERSION, package.json, README, CHANGELOG, and docs/index.html
+* `docs/index.html` command catalog updated from 8 stale entries to all 30 current commands (removed non-existent `get-directory` and `update-device-firmware`; added all device, directory, profile, and assignment commands)
+* `docs/COMMANDS.md` rewritten to match the 30-command catalog in `config/commands.json`
+
+### Fixed
+
+* README version badge corrected from `0.1.1` to `0.1.3`
+* ROADMAP current status updated from `v0.1.1` to `v0.1.3`; removed duplicate `[x] Audit log` entry from Later section
+
 ## [0.1.2] - 2026-05-22
 
 ### Added

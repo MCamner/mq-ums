@@ -5,6 +5,7 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   test:
@@ -25,3 +26,45 @@ jobs:
 
       - name: Run tests
         run: npm test
+
+  docs-consistency:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read VERSION
+        run: echo "VERSION=$(cat VERSION)" >> "$GITHUB_ENV"
+
+      - name: package.json version matches VERSION
+        run: |
+          PKG=$(node -p "require('./package.json').version")
+          if [ "$PKG" != "$VERSION" ]; then
+            echo "FAIL: package.json $PKG != VERSION $VERSION" >&2
+            exit 1
+          fi
+          echo "OK: package.json $PKG"
+
+      - name: README contains current version badge
+        run: |
+          grep -q "version-${VERSION}" README.md || {
+            echo "FAIL: README.md missing version-${VERSION}" >&2
+            exit 1
+          }
+          echo "OK: README contains version-${VERSION}"
+
+      - name: CHANGELOG contains current version
+        run: |
+          grep -q "\[${VERSION}\]" CHANGELOG.md || {
+            echo "FAIL: CHANGELOG.md missing [${VERSION}]" >&2
+            exit 1
+          }
+          echo "OK: CHANGELOG contains [${VERSION}]"
+
+      - name: docs/index.html contains current version
+        run: |
+          grep -q "v${VERSION}" docs/index.html || {
+            echo "FAIL: docs/index.html missing v${VERSION}" >&2
+            exit 1
+          }
+          echo "OK: docs/index.html contains v${VERSION}"

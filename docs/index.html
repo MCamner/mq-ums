@@ -131,6 +131,7 @@
     .cmd-table th { color: var(--muted); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; }
     .cmd-table tr:last-child td { border-bottom: none; }
     .cmd-table td:first-child { font-family: var(--mono); color: var(--accent); }
+    .cmd-section td { color: var(--muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; padding: 14px 14px 6px; border-bottom: none; background: none; }
 
     .badge {
       display: inline-block;
@@ -283,14 +284,47 @@
           <tr><th>Command</th><th>PSIGEL function</th><th>Type</th><th>Description</th></tr>
         </thead>
         <tbody>
+          <tr class="cmd-section"><td colspan="4">Status</td></tr>
           <tr><td>get-status</td><td>Get-UMSStatus</td><td><span class="badge badge-read">read</span></td><td>UMS server status and version</td></tr>
           <tr><td>get-firmware</td><td>Get-UMSFirmware</td><td><span class="badge badge-read">read</span></td><td>Registered firmware versions</td></tr>
+
+          <tr class="cmd-section"><td colspan="4">Devices</td></tr>
           <tr><td>get-device</td><td>Get-UMSDevice</td><td><span class="badge badge-read">read</span></td><td>Device list with optional details filter</td></tr>
-          <tr><td>get-profile</td><td>Get-UMSProfile</td><td><span class="badge badge-read">read</span></td><td>Registered profiles</td></tr>
-          <tr><td>get-directory</td><td>Get-UMSDirectory</td><td><span class="badge badge-read">read</span></td><td>Directory structure</td></tr>
-          <tr><td>restart-device</td><td>Restart-UMSDevice</td><td><span class="badge badge-write">write</span></td><td>Restart a device by ID</td></tr>
-          <tr><td>update-device-firmware</td><td>Update-UMSDeviceFirmware</td><td><span class="badge badge-write">write</span></td><td>Assign firmware version to device</td></tr>
-          <tr><td>move-device</td><td>Move-UMSDevice</td><td><span class="badge badge-write">write</span></td><td>Move device to directory</td></tr>
+          <tr><td>start-device</td><td>Start-UMSDevice</td><td><span class="badge badge-write">write</span></td><td>Wake-on-LAN a device by Id</td></tr>
+          <tr><td>stop-device</td><td>Stop-UMSDevice</td><td><span class="badge badge-write">write</span></td><td>Shut down a device by Id</td></tr>
+          <tr><td>restart-device</td><td>Restart-UMSDevice</td><td><span class="badge badge-write">write</span></td><td>Restart a device by Id</td></tr>
+          <tr><td>send-device-settings</td><td>Send-UMSDeviceSetting</td><td><span class="badge badge-write">write</span></td><td>Push current profile settings to a device</td></tr>
+          <tr><td>update-device</td><td>Update-UMSDevice</td><td><span class="badge badge-write">write</span></td><td>Update device metadata (Name, Site, Department…)</td></tr>
+          <tr><td>move-device</td><td>Move-UMSDevice</td><td><span class="badge badge-write">write</span></td><td>Move device to a directory</td></tr>
+          <tr><td>remove-device</td><td>Remove-UMSDevice</td><td><span class="badge badge-write">write</span></td><td>Delete a device from UMS</td></tr>
+          <tr><td>reset-device</td><td>Reset-UMSDevice</td><td><span class="badge badge-write">write</span></td><td>Reset device to factory defaults</td></tr>
+
+          <tr class="cmd-section"><td colspan="4">Device Directories</td></tr>
+          <tr><td>get-device-directory</td><td>Get-UMSDeviceDirectory</td><td><span class="badge badge-read">read</span></td><td>List device directories</td></tr>
+          <tr><td>new-device-directory</td><td>New-UMSDeviceDirectory</td><td><span class="badge badge-write">write</span></td><td>Create a device directory</td></tr>
+          <tr><td>update-device-directory</td><td>Update-UMSDeviceDirectory</td><td><span class="badge badge-write">write</span></td><td>Rename a device directory</td></tr>
+          <tr><td>move-device-directory</td><td>Move-UMSDeviceDirectory</td><td><span class="badge badge-write">write</span></td><td>Move a device directory into another</td></tr>
+          <tr><td>remove-device-directory</td><td>Remove-UMSDeviceDirectory</td><td><span class="badge badge-write">write</span></td><td>Delete a device directory (must be empty)</td></tr>
+
+          <tr class="cmd-section"><td colspan="4">Profiles</td></tr>
+          <tr><td>get-profile</td><td>Get-UMSProfile</td><td><span class="badge badge-read">read</span></td><td>List all profiles</td></tr>
+          <tr><td>update-profile</td><td>Update-UMSProfile</td><td><span class="badge badge-write">write</span></td><td>Rename a profile</td></tr>
+          <tr><td>move-profile</td><td>Move-UMSProfile</td><td><span class="badge badge-write">write</span></td><td>Move a profile to a directory</td></tr>
+          <tr><td>remove-profile</td><td>Remove-UMSProfile</td><td><span class="badge badge-write">write</span></td><td>Delete a profile from UMS</td></tr>
+
+          <tr class="cmd-section"><td colspan="4">Profile Directories</td></tr>
+          <tr><td>get-profile-directory</td><td>Get-UMSProfileDirectory</td><td><span class="badge badge-read">read</span></td><td>List profile directories</td></tr>
+          <tr><td>new-profile-directory</td><td>New-UMSProfileDirectory</td><td><span class="badge badge-write">write</span></td><td>Create a profile directory</td></tr>
+          <tr><td>update-profile-directory</td><td>Update-UMSProfileDirectory</td><td><span class="badge badge-write">write</span></td><td>Rename a profile directory</td></tr>
+          <tr><td>move-profile-directory</td><td>Move-UMSProfileDirectory</td><td><span class="badge badge-write">write</span></td><td>Move a profile directory into another</td></tr>
+          <tr><td>remove-profile-directory</td><td>Remove-UMSProfileDirectory</td><td><span class="badge badge-write">write</span></td><td>Delete a profile directory (must be empty)</td></tr>
+
+          <tr class="cmd-section"><td colspan="4">Assignments</td></tr>
+          <tr><td>get-device-assignments</td><td>Get-UMSDeviceAssignment</td><td><span class="badge badge-read">read</span></td><td>Profiles assigned to a specific device</td></tr>
+          <tr><td>get-device-directory-assignments</td><td>Get-UMSDeviceDirectoryAssignment</td><td><span class="badge badge-read">read</span></td><td>Profiles assigned to a device directory</td></tr>
+          <tr><td>get-profile-assignments</td><td>Get-UMSProfileAssignment</td><td><span class="badge badge-read">read</span></td><td>Devices and directories assigned to a profile</td></tr>
+          <tr><td>assign-profile</td><td>New-UMSProfileAssignment</td><td><span class="badge badge-write">write</span></td><td>Assign a profile to a device or directory</td></tr>
+          <tr><td>remove-profile-assignment</td><td>Remove-UMSProfileAssignment</td><td><span class="badge badge-write">write</span></td><td>Remove a profile assignment</td></tr>
         </tbody>
       </table>
     </section>
@@ -340,7 +374,7 @@
 
 <footer>
   <div class="container">
-    mq-ums — MIT License — <a href="https://github.com/MCamner/mq-ums">github.com/MCamner/mq-ums</a>
+    mq-ums v0.1.3 — MIT License — <a href="https://github.com/MCamner/mq-ums">github.com/MCamner/mq-ums</a>
   </div>
 </footer>
 

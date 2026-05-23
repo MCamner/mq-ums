@@ -4,7 +4,7 @@
 
 ## Current status
 
-`v0.1.1` — working prototype, read-only verified, not yet tested against real UMS.
+`v0.1.3` — working prototype with health endpoint, dry-run mode, audit log, 30-command catalog, and CI validation.
 
 ## Now — v0.1.x
 
@@ -31,7 +31,6 @@ Focus: make it reliable enough for daily use.
 ## Later
 
 - [ ] Role-based command profiles (read-only vs operator)
-- [x] Audit log
 - [ ] Multi-UMS support
 - [ ] Webhook notifications on dangerous command execution
 

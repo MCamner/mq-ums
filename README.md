@@ -3,7 +3,7 @@
 Local web UI for managing IGEL UMS via [PSIGEL](https://github.com/MCamner/PSIGEL).
 
 ![CI](https://github.com/MCamner/mq-ums/actions/workflows/ci.yml/badge.svg)
-![Version](https://img.shields.io/badge/version-0.1.1-blue)
+![Version](https://img.shields.io/badge/version-0.1.3-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ```text
@@ -57,6 +57,18 @@ Start with read-only commands: `Get-UMSStatus`, `Get-UMSFirmware`, `Get-UMSDevic
 
 Edit `config/commands.json` and add an entry. Run `npm run validate` to check.
 No code changes needed — the runner is data-driven.
+
+## Proof
+
+- `config/commands.json` is the sole allowlist — no command runs unless it appears there
+- `server/src/validate-config.js` enforces: safe psCommand format (`^[A-Za-z]+-[A-Za-z]+$`), allowed verb set, arg name safety (`^[A-Za-z]\w{0,63}$`), danger+confirmText pairing, and no duplicate IDs
+- `validate-config.js` runs at server startup and on every CI push — bad config blocks startup
+- Dangerous commands (`Restart-*`, `Remove-*`, `Reset-*`, `Move-*`, etc.) require `confirmText: "RUN"` in both config and client request
+- Dry-run mode previews what would execute without spawning PowerShell
+- Every command execution is written to `logs/audit-YYYY-MM-DD.jsonl` — timestamp, command, args, status
+- Credentials stored via Windows DPAPI (`Export-Clixml`) — never in `.env` or plaintext
+- API binds to `127.0.0.1` by default — not exposed to network without explicit override
+- `release-check.sh` gates every release on: config validation, tests, version sync across VERSION/package.json/README/CHANGELOG/docs/index.html
 
 ## Security
 
