@@ -57,6 +57,18 @@ else
   fail "docs/index.html missing v${VERSION} — update the footer"
 fi
 
+if [[ -f "$ROOT/docs/LIVE_UMS_VALIDATION.md" ]]; then
+  ok "docs/LIVE_UMS_VALIDATION.md exists"
+else
+  fail "docs/LIVE_UMS_VALIDATION.md missing"
+fi
+
+if [[ -f "$ROOT/scripts/Test-LiveUmsValidation.ps1" ]]; then
+  ok "scripts/Test-LiveUmsValidation.ps1 exists"
+else
+  fail "scripts/Test-LiveUmsValidation.ps1 missing"
+fi
+
 # Summary
 echo ""
 if [[ "$ERRORS" -eq 0 ]]; then

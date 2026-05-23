@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.1.4] - 2026-05-24
+
+### Added
+
+* `docs/LIVE_UMS_VALIDATION.md` with the v0.1.4 live read-only UMS validation checklist.
+* `scripts/Test-LiveUmsValidation.ps1` for validating `Get-UMSStatus`, `Get-UMSFirmware`, and `Get-UMSDevice` through the same allowlisted runner used by the API.
+* README live validation section with the supported read-only commands and documentation link.
+* Release-check verification that the live validation doc and script exist.
+
+### Changed
+
+* Bumped project version to `0.1.4`.
+* Updated GitHub Pages footer and docs links for v0.1.4.
+* Roadmap now tracks v0.1.4 as a live-validation release candidate instead of a feature expansion.
+
+### Safety
+
+* Documented redaction rules for hostnames, usernames, domains, serials, device names, tokens, API keys and credential paths.
+* Live validation remains read-only and does not add new UMS write actions.
+
 ## [0.1.3] - 2026-05-23
 
 ### Added

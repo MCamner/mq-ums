@@ -39,10 +39,10 @@ Every dangerous command must require explicit confirmation.
 
 ## Current status
 
-Current stable version:
+Current release candidate:
 
 ```text
-v0.1.3 — docs, CI and validation hardening
+v0.1.4 — live UMS validation
 ```
 
 Current capability:
@@ -58,11 +58,13 @@ Current capability:
 - config validation
 - GitHub Pages landing page
 - CI validation
+- live validation checklist
+- live read-only validation harness
 
-Current priority:
+Current priority after v0.1.4 validation:
 
 ```text
-v0.1.4 — live UMS validation
+v0.2.0 — daily-use operator UI
 ```
 
 Reason:
@@ -81,7 +83,7 @@ environment.
 | v0.1.1  | Local UI and command catalog foundation | Done    |
 | v0.1.2  | Health, dry-run and audit foundation    | Done    |
 | v0.1.3  | Docs, CI and validation hardening       | Done    |
-| v0.1.4  | Live UMS validation                     | Next    |
+| v0.1.4  | Live UMS validation                     | RC      |
 | v0.2.0  | Daily-use operator UI                   | Planned |
 | v0.3.0  | Safety profiles and command governance  | Planned |
 | v0.4.0  | Device fleet workflows                  | Planned |
@@ -170,7 +172,7 @@ Make the prototype easier to trust before live UMS testing.
 
 ---
 
-## Next: v0.1.4 — Live UMS validation
+## Current: v0.1.4 — Live UMS validation
 
 Goal:
 
@@ -193,13 +195,14 @@ real credentials and real UMS responses.
 - [ ] Confirm dry-run never executes PSIGEL
 - [ ] Confirm audit log captures command name, time, result and safety class
 - [ ] Confirm audit log does not capture secrets
-- [ ] Add `docs/LIVE_UMS_VALIDATION.md`
-- [ ] Add live validation checklist
-- [ ] Add sample redacted output
-- [ ] Add troubleshooting for failed UMS connection
-- [ ] Add troubleshooting for missing PSIGEL module
-- [ ] Add troubleshooting for certificate/TLS problems
-- [ ] Add troubleshooting for permissions errors
+- [x] Add `docs/LIVE_UMS_VALIDATION.md`
+- [x] Add live validation checklist
+- [x] Add sample redacted output
+- [x] Add troubleshooting for failed UMS connection
+- [x] Add troubleshooting for missing PSIGEL module
+- [x] Add troubleshooting for certificate/TLS problems
+- [x] Add troubleshooting for permissions errors
+- [x] Add live validation harness script
 
 ### Recommended live test commands
 
@@ -232,8 +235,8 @@ http://127.0.0.1:3000
 - [ ] Session teardown verified
 - [ ] Audit log verified
 - [ ] No secret leakage found
-- [ ] `docs/LIVE_UMS_VALIDATION.md` exists
-- [ ] README includes live validation status
+- [x] `docs/LIVE_UMS_VALIDATION.md` exists
+- [x] README includes live validation status
 - [ ] GitHub Actions pass
 - [ ] GitHub release `v0.1.4` exists
 
@@ -576,8 +579,8 @@ Every command must have:
 Work on:
 
 ```text
-v0.1.4 — live UMS validation
+complete live UMS validation on a Windows management host, then v0.2.0
 ```
 
-This release should prove that mq-ums works safely against a real IGEL UMS
-environment before the UI grows into daily operational use.
+v0.1.4 has the validation docs and harness in place. The remaining gate is to
+run the checklist against a real IGEL UMS environment before expanding the UI.
