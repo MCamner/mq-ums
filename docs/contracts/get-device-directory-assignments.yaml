@@ -1,0 +1,11 @@
+id: "get-device-directory-assignments"
+name: "Get Device Directory Assignments"
+section: "Assignments"
+psCommand: "Get-UMSDeviceDirectoryAssignment"
+description: "Lists all profiles assigned to a device directory. Requires directory Id."
+danger: false
+inputs:
+  - name: Id
+    required: true
+    notes: "Numeric ID from the corresponding Get command"
+python_wrapper: false

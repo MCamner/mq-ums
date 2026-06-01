@@ -1,0 +1,15 @@
+id: "update-profile"
+name: "Rename Profile"
+section: "Profiles"
+psCommand: "Update-UMSProfile"
+description: "Renames a profile. Requires profile Id and new Name."
+danger: true
+confirmText: "RUN"
+inputs:
+  - name: Id
+    required: true
+    notes: "Numeric ID from the corresponding Get command"
+  - name: Name
+    required: true
+    notes: "Display name"
+python_wrapper: false

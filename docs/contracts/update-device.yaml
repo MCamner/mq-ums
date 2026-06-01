@@ -1,0 +1,30 @@
+id: "update-device"
+name: "Update Device"
+section: "Devices"
+psCommand: "Update-UMSDevice"
+description: "Updates device metadata (Name, Site, Department, CostCenter, Comment, AssetId). Requires device Id."
+danger: true
+confirmText: "RUN"
+inputs:
+  - name: Id
+    required: true
+    notes: "Numeric ID from the corresponding Get command"
+  - name: Name
+    required: false
+    notes: "Display name"
+  - name: Site
+    required: false
+    notes: "Site label (optional metadata)"
+  - name: Department
+    required: false
+    notes: "Department label (optional metadata)"
+  - name: CostCenter
+    required: false
+    notes: "Cost center label (optional metadata)"
+  - name: Comment
+    required: false
+    notes: "Free-text comment (optional metadata)"
+  - name: AssetId
+    required: false
+    notes: "Asset ID label (optional metadata)"
+python_wrapper: false

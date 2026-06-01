@@ -1,0 +1,14 @@
+id: "get-device-directory"
+name: "Get Device Directories"
+section: "Device Directories"
+psCommand: "Get-UMSDeviceDirectory"
+description: "Lists device directories. Pass Id for a specific directory. Filter: children to include child elements."
+danger: false
+inputs:
+  - name: Id
+    required: false
+    notes: "Numeric ID from the corresponding Get command"
+  - name: Filter
+    required: false
+    notes: "Varies by command — see PSIGEL docs"
+python_wrapper: false

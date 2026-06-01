@@ -1,0 +1,12 @@
+id: "new-device-directory"
+name: "New Device Directory"
+section: "Device Directories"
+psCommand: "New-UMSDeviceDirectory"
+description: "Creates a new device directory. Requires Name."
+danger: true
+confirmText: "RUN"
+inputs:
+  - name: Name
+    required: true
+    notes: "Display name"
+python_wrapper: false

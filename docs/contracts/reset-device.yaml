@@ -1,0 +1,12 @@
+id: "reset-device"
+name: "Reset Device to Factory Defaults"
+section: "Devices"
+psCommand: "Reset-UMSDevice"
+description: "Resets a device to factory defaults (2FA reset). Requires device Id. Cannot be undone."
+danger: true
+confirmText: "RUN"
+inputs:
+  - name: Id
+    required: true
+    notes: "Numeric ID from the corresponding Get command"
+python_wrapper: false

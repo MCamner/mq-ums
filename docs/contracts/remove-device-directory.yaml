@@ -1,0 +1,12 @@
+id: "remove-device-directory"
+name: "Remove Device Directory"
+section: "Device Directories"
+psCommand: "Remove-UMSDeviceDirectory"
+description: "Deletes a device directory. Requires directory Id. The directory must be empty."
+danger: true
+confirmText: "RUN"
+inputs:
+  - name: Id
+    required: true
+    notes: "Numeric ID from the corresponding Get command"
+python_wrapper: false

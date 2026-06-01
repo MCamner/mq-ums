@@ -1,0 +1,12 @@
+id: "remove-profile-directory"
+name: "Remove Profile Directory"
+section: "Profile Directories"
+psCommand: "Remove-UMSProfileDirectory"
+description: "Deletes a profile directory. Requires directory Id. The directory must be empty."
+danger: true
+confirmText: "RUN"
+inputs:
+  - name: Id
+    required: true
+    notes: "Numeric ID from the corresponding Get command"
+python_wrapper: false

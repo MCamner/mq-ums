@@ -1,0 +1,15 @@
+id: "update-device-directory"
+name: "Rename Device Directory"
+section: "Device Directories"
+psCommand: "Update-UMSDeviceDirectory"
+description: "Renames a device directory. Requires directory Id and new Name."
+danger: true
+confirmText: "RUN"
+inputs:
+  - name: Id
+    required: true
+    notes: "Numeric ID from the corresponding Get command"
+  - name: Name
+    required: true
+    notes: "Display name"
+python_wrapper: false

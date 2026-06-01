@@ -1,0 +1,15 @@
+id: "move-profile"
+name: "Move Profile"
+section: "Profiles"
+psCommand: "Move-UMSProfile"
+description: "Moves a profile to a different profile directory. Requires profile Id and destination directory DestId."
+danger: true
+confirmText: "RUN"
+inputs:
+  - name: Id
+    required: true
+    notes: "Numeric ID from the corresponding Get command"
+  - name: DestId
+    required: true
+    notes: "Numeric ID of the destination directory"
+python_wrapper: false

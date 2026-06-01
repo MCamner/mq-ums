@@ -1,0 +1,12 @@
+id: "stop-device"
+name: "Stop Device"
+section: "Devices"
+psCommand: "Stop-UMSDevice"
+description: "Shuts down a device. Requires device Id."
+danger: true
+confirmText: "RUN"
+inputs:
+  - name: Id
+    required: true
+    notes: "Numeric ID from the corresponding Get command"
+python_wrapper: false

@@ -1,0 +1,11 @@
+id: "get-device-assignments"
+name: "Get Device Assignments"
+section: "Assignments"
+psCommand: "Get-UMSDeviceAssignment"
+description: "Lists all profiles currently assigned to a specific device. Requires device Id."
+danger: false
+inputs:
+  - name: Id
+    required: true
+    notes: "Numeric ID from the corresponding Get command"
+python_wrapper: false

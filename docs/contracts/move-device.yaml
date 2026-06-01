@@ -1,0 +1,15 @@
+id: "move-device"
+name: "Move Device"
+section: "Devices"
+psCommand: "Move-UMSDevice"
+description: "Moves a device to a different directory. Requires device Id and destination directory DestId."
+danger: true
+confirmText: "RUN"
+inputs:
+  - name: Id
+    required: true
+    notes: "Numeric ID from the corresponding Get command"
+  - name: DestId
+    required: true
+    notes: "Numeric ID of the destination directory"
+python_wrapper: false
