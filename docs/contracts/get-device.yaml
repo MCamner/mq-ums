@@ -1,0 +1,14 @@
+id: "get-device"
+name: "Get Devices"
+section: "Devices"
+psCommand: "Get-UMSDevice"
+description: "Lists devices registered in UMS. Pass Id for a single device."
+danger: false
+inputs:
+  - name: Id
+    required: false
+    notes: "Numeric device ID. Omit to list all devices."
+  - name: Filter
+    required: false
+    notes: "short (default) | details | online | shadow | deviceattributes | networkadapters"
+python_wrapper: false

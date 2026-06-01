@@ -1,0 +1,11 @@
+id: "get-firmware"
+name: "Get Firmware"
+section: "Status"
+psCommand: "Get-UMSFirmware"
+description: "Lists all firmware versions registered in UMS. Pass Id to get a specific version."
+danger: false
+inputs:
+  - name: Id
+    required: false
+    notes: "Numeric firmware ID. Omit to list all firmware versions."
+python_wrapper: false
