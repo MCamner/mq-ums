@@ -1,0 +1,15 @@
+# Example: Restart Device
+# Run: python3 tools/generate-command-from-template.py docs/templates/command-contract-example.yaml
+
+id: "restart-device"
+name: "Restart Device"
+section: "Devices"
+psCommand: "Restart-UMSDevice"
+description: "Restarts a device. Requires device Id."
+danger: true
+confirmText: "RUN"
+inputs:
+  - name: Id
+    required: true
+    notes: "Numeric device ID (from Get Devices)"
+python_wrapper: true

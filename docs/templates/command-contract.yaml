@@ -1,0 +1,39 @@
+# Command contract template
+# Fill in all fields and run:
+#   python3 tools/generate-command-from-template.py docs/templates/your-command.yaml
+#   python3 tools/generate-command-from-template.py docs/templates/your-command.yaml --apply
+
+# Required: unique kebab-case identifier matching commands.json
+id: ""
+
+# Required: display name shown in the UI
+name: ""
+
+# Required: section grouping in commands.json and docs (e.g. Devices, Profiles, Status)
+section: ""
+
+# Required: exact PSIGEL PowerShell cmdlet name
+psCommand: ""
+
+# Required: one-sentence description of what the command does
+description: ""
+
+# Required: true if the command mutates state; false for read-only
+danger: false
+
+# Required when danger: true — confirmation string the user must type (e.g. RUN)
+confirmText: ""
+
+# List of accepted argument names. Must match [A-Za-z]\w{0,63}
+# Each entry: name (required), required (bool), notes (string)
+inputs: []
+# inputs:
+#   - name: Id
+#     required: true
+#     notes: "Numeric device ID from Get Devices"
+#   - name: Filter
+#     required: false
+#     notes: "short | details | online"
+
+# Set to true to also emit a Python wrapper function
+python_wrapper: false
