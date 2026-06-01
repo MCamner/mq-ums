@@ -3,7 +3,7 @@
 Local web UI for managing IGEL UMS via [PSIGEL](https://github.com/MCamner/PSIGEL).
 
 ![CI](https://github.com/MCamner/mq-ums/actions/workflows/ci.yml/badge.svg)
-![Version](https://img.shields.io/badge/version-0.1.3-blue)
+![Version](https://img.shields.io/badge/version-0.1.4-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ```text
@@ -53,6 +53,26 @@ Start with read-only commands: `Get-UMSStatus`, `Get-UMSFirmware`, `Get-UMSDevic
 .\scripts\Test-PSIGEL.ps1 -UmsHost ums.example.com -CredPath C:\mq-ums\ums.cred.xml
 ```
 
+## Live UMS validation
+
+v0.1.4 adds a live validation flow for the first three read-only PSIGEL
+commands:
+
+```powershell
+Get-UMSStatus
+Get-UMSFirmware
+Get-UMSDevice
+```
+
+Run it on a Windows management host that can reach IGEL UMS:
+
+```powershell
+.\scripts\Test-LiveUmsValidation.ps1
+```
+
+See [docs/LIVE_UMS_VALIDATION.md](docs/LIVE_UMS_VALIDATION.md) for the full
+checklist, redaction rules and troubleshooting notes.
+
 ## Adding commands
 
 Edit `config/commands.json` and add an entry. Run `npm run validate` to check.
@@ -68,6 +88,7 @@ No code changes needed — the runner is data-driven.
 - Every command execution is written to `logs/audit-YYYY-MM-DD.jsonl` — timestamp, command, args, status
 - Credentials stored via Windows DPAPI (`Export-Clixml`) — never in `.env` or plaintext
 - API binds to `127.0.0.1` by default — not exposed to network without explicit override
+- `docs/LIVE_UMS_VALIDATION.md` defines the live read-only validation path and secret-redaction rules for v0.1.4
 - `release-check.sh` gates every release on: config validation, tests, version sync across VERSION/package.json/README/CHANGELOG/docs/index.html
 
 ## Security
@@ -90,5 +111,6 @@ See [ROADMAP.md](ROADMAP.md).
 - [Architecture](docs/ARCHITECTURE.md)
 - [Security](docs/SECURITY.md)
 - [PSIGEL Notes](docs/PSIGEL_NOTES.md)
+- [Live UMS Validation](docs/LIVE_UMS_VALIDATION.md)
 - [Roadmap](ROADMAP.md)
 - [Changelog](CHANGELOG.md)
