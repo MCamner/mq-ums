@@ -1,0 +1,14 @@
+id: "get-profile-directory"
+name: "Get Profile Directories"
+section: "Profile Directories"
+psCommand: "Get-UMSProfileDirectory"
+description: "Lists profile directories. Pass Id for a specific directory. Filter: children to include child elements."
+danger: false
+inputs:
+  - name: Id
+    required: false
+    notes: "Numeric ID from the corresponding Get command"
+  - name: Filter
+    required: false
+    notes: "Varies by command — see PSIGEL docs"
+python_wrapper: false

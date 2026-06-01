@@ -1,0 +1,12 @@
+id: "new-profile-directory"
+name: "New Profile Directory"
+section: "Profile Directories"
+psCommand: "New-UMSProfileDirectory"
+description: "Creates a new profile directory. Requires Name."
+danger: true
+confirmText: "RUN"
+inputs:
+  - name: Name
+    required: true
+    notes: "Display name"
+python_wrapper: false

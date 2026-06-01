@@ -1,0 +1,8 @@
+id: "get-status"
+name: "Get UMS Status"
+section: "Status"
+psCommand: "Get-UMSStatus"
+description: "Returns UMS server status, version, and build information."
+danger: false
+inputs: []
+python_wrapper: false

@@ -1,0 +1,12 @@
+id: "send-device-settings"
+name: "Send Device Settings"
+section: "Devices"
+psCommand: "Send-UMSDeviceSetting"
+description: "Pushes current profile settings to a device immediately. Requires device Id."
+danger: true
+confirmText: "RUN"
+inputs:
+  - name: Id
+    required: true
+    notes: "Numeric ID from the corresponding Get command"
+python_wrapper: false

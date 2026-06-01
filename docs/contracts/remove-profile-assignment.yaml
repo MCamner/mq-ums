@@ -1,0 +1,18 @@
+id: "remove-profile-assignment"
+name: "Remove Profile Assignment"
+section: "Assignments"
+psCommand: "Remove-UMSProfileAssignment"
+description: "Removes a profile assignment from a device or device directory. Id = profile Id. ReceiverId = target Id. ReceiverType = tc or tcdirectory."
+danger: true
+confirmText: "RUN"
+inputs:
+  - name: Id
+    required: true
+    notes: "Numeric ID from the corresponding Get command"
+  - name: ReceiverId
+    required: true
+    notes: "Numeric ID of the target device or directory"
+  - name: ReceiverType
+    required: true
+    notes: "tc (device) or tcdirectory (device directory)"
+python_wrapper: false

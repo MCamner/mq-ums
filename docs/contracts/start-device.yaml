@@ -1,0 +1,12 @@
+id: "start-device"
+name: "Start Device (Wake-on-LAN)"
+section: "Devices"
+psCommand: "Start-UMSDevice"
+description: "Sends a wake-on-LAN command to a device. Requires device Id."
+danger: true
+confirmText: "RUN"
+inputs:
+  - name: Id
+    required: true
+    notes: "Numeric ID from the corresponding Get command"
+python_wrapper: false

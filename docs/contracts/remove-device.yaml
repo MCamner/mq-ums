@@ -1,0 +1,12 @@
+id: "remove-device"
+name: "Remove Device"
+section: "Devices"
+psCommand: "Remove-UMSDevice"
+description: "Deletes a device from UMS. Requires device Id. Cannot be undone."
+danger: true
+confirmText: "RUN"
+inputs:
+  - name: Id
+    required: true
+    notes: "Numeric ID from the corresponding Get command"
+python_wrapper: false

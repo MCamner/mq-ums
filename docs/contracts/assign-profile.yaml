@@ -1,0 +1,18 @@
+id: "assign-profile"
+name: "Assign Profile"
+section: "Assignments"
+psCommand: "New-UMSProfileAssignment"
+description: "Assigns a profile to a device or device directory. Id = profile Id. ReceiverId = target device or directory Id. ReceiverType = tc or tcdirectory."
+danger: true
+confirmText: "RUN"
+inputs:
+  - name: Id
+    required: true
+    notes: "Numeric ID from the corresponding Get command"
+  - name: ReceiverId
+    required: true
+    notes: "Numeric ID of the target device or directory"
+  - name: ReceiverType
+    required: true
+    notes: "tc (device) or tcdirectory (device directory)"
+python_wrapper: false

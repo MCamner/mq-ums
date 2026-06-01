@@ -1,0 +1,12 @@
+id: "remove-profile"
+name: "Remove Profile"
+section: "Profiles"
+psCommand: "Remove-UMSProfile"
+description: "Deletes a profile from UMS. Requires profile Id. Cannot be undone."
+danger: true
+confirmText: "RUN"
+inputs:
+  - name: Id
+    required: true
+    notes: "Numeric ID from the corresponding Get command"
+python_wrapper: false

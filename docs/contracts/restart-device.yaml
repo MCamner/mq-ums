@@ -1,0 +1,12 @@
+id: "restart-device"
+name: "Restart Device"
+section: "Devices"
+psCommand: "Restart-UMSDevice"
+description: "Restarts a device. Requires device Id."
+danger: true
+confirmText: "RUN"
+inputs:
+  - name: Id
+    required: true
+    notes: "Numeric ID from the corresponding Get command"
+python_wrapper: false

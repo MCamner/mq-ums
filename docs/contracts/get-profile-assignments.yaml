@@ -1,0 +1,11 @@
+id: "get-profile-assignments"
+name: "Get Profile Assignments"
+section: "Assignments"
+psCommand: "Get-UMSProfileAssignment"
+description: "Lists all devices and directories that a profile is assigned to. Requires profile Id."
+danger: false
+inputs:
+  - name: Id
+    required: true
+    notes: "Numeric ID from the corresponding Get command"
+python_wrapper: false

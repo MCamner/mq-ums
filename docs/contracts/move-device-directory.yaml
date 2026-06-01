@@ -1,0 +1,15 @@
+id: "move-device-directory"
+name: "Move Device Directory"
+section: "Device Directories"
+psCommand: "Move-UMSDeviceDirectory"
+description: "Moves a device directory into another parent directory. Requires directory Id and destination DestId."
+danger: true
+confirmText: "RUN"
+inputs:
+  - name: Id
+    required: true
+    notes: "Numeric ID from the corresponding Get command"
+  - name: DestId
+    required: true
+    notes: "Numeric ID of the destination directory"
+python_wrapper: false
