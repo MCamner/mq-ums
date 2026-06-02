@@ -73,6 +73,19 @@ The prototype is in good shape. The next risk is not more UI polish. The next
 risk is whether the allowed commands behave correctly against a real IGEL UMS
 environment.
 
+The next implementation step should be operator usefulness, not more command
+count. v0.2.0 should make the existing read-only and low-risk commands easier
+to run repeatedly during normal support work.
+
+v0.2.0 should prioritize:
+
+- device search, filtering and pagination
+- clearer command result detail views
+- repeatable read-only checks with cached output
+- command history visible in the browser
+- copyable JSON and short support summaries
+- preserved audit logging and confirmation rules
+
 ---
 
 ## Release map
@@ -248,6 +261,12 @@ Goal:
 
 Make mq-ums useful for regular read-only and low-risk operational checks.
 
+Design boundary:
+
+The browser UI may make existing allowlisted commands easier to discover,
+repeat and inspect. It must not introduce arbitrary PowerShell, bypass
+confirmation text, or weaken audit logging.
+
 ### Planned scope
 
 - [ ] Improve device list view
@@ -258,6 +277,22 @@ Make mq-ums useful for regular read-only and low-risk operational checks.
 - [ ] Add command result detail view
 - [ ] Add copy result as JSON
 - [ ] Add copy command summary
+- [ ] Add operator-friendly empty/error states
+- [ ] Add UI tests for search/filter/history behavior
+- [ ] Keep dangerous command confirmation unchanged
+- [ ] Keep audit events for cached and repeated command usage
+
+### First implementation slice
+
+Start with read-only operator flow:
+
+1. Device search/filter surface
+2. Result detail drawer or panel
+3. Command history list for the current browser session
+4. Copy JSON and copy short summary actions
+
+That slice is enough to prove daily usefulness without changing the safety
+model.
 - [ ] Add better loading states
 - [ ] Add better error messages from PowerShell failures
 - [ ] Add empty-state messages
