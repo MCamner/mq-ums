@@ -85,6 +85,7 @@ v0.2.0 should prioritize:
 - command history visible in the browser
 - copyable JSON and short support summaries
 - preserved audit logging and confirmation rules
+- reuse of MQ operator UI patterns where they fit local UMS workflows
 
 ---
 
@@ -103,7 +104,38 @@ v0.2.0 should prioritize:
 | v0.5.0  | Job execution and rollback visibility   | Planned |
 | v0.6.0  | Reporting and audit export              | Planned |
 | v0.7.0  | Multi-UMS support                       | Planned |
+| v0.8.0  | MQ operator UI pattern adoption         | Future  |
 | v1.0.0  | Stable local UMS operations console     | Future  |
+
+---
+
+## Future: v0.8.0 — MQ operator UI pattern adoption
+
+Goal:
+
+Adopt useful operator UI patterns from the MQ stack once mq-agent release status,
+mq-mcp Release Gate v2 and mq-hal stack status have stabilized.
+
+Planned direction:
+
+- [ ] Reuse status-summary patterns for UMS health and command readiness
+- [ ] Reuse blocker/warning/next-action presentation for UMS validation results
+- [ ] Keep command history, audit log and confirmation rules visible in the UI
+- [ ] Prefer copyable JSON and short support summaries for repeated operations
+- [ ] Keep browser UI local and command-allowlist driven
+
+Boundary:
+
+```text
+mq-ums consumes proven operator UI patterns later.
+mq-ums does not own MQ release gate, mq-agent orchestration or mq-mcp review logic.
+```
+
+Non-goals:
+
+- no direct dependency on MQ Release Gate v2 for UMS operations
+- no raw PowerShell execution from the browser
+- no hidden command execution or secret exposure
 
 ---
 
