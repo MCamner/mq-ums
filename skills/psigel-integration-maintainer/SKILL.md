@@ -7,6 +7,18 @@ description: Use when changing mq-ums PowerShell scripts, PSIGEL integration, Wi
 
 Use this skill for the Windows and PSIGEL side of mq-ums.
 
+## When to use
+
+- Changing PowerShell scripts, credential handling, install flow, or PSIGEL integration
+- Debugging live UMS validation, `Invoke-UmsCommand.ps1`, or Windows-specific setup
+- Updating PSIGEL notes, live validation docs, or troubleshooting documentation
+
+## When not to use
+
+- Web UI changes — use `web-ui-maintainer`
+- API or command safety changes — use `ums-command-safety-maintainer`
+- General docs — use `docs-maintainer`
+
 ## Core Files
 
 - `scripts/Invoke-UmsCommand.ps1`

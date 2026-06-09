@@ -7,6 +7,18 @@ description: Use when changing mq-ums web UI, command form behavior, dry-run flo
 
 Use this skill for the local browser UI under `web/`.
 
+## When to use
+
+- Changing `web/index.html`, `app.js`, or `styles.css`
+- Improving command forms, dry-run flow, confirmation UX, or JSON output display
+- Reviewing browser-side safety affordances or API status presentation
+
+## When not to use
+
+- Adding or changing commands in `config/commands.json` — use `ums-command-safety-maintainer`
+- PowerShell or PSIGEL integration — use `psigel-integration-maintainer`
+- API server changes — use `ums-command-safety-maintainer`
+
 ## UI Role
 
 The UI is an operational control panel for IGEL UMS actions. It should be quiet, clear, and safety-forward rather than decorative.

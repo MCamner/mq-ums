@@ -7,6 +7,33 @@ description: Use when preparing mq-ums for release by checking version sync, com
 
 Use this skill before tagging, publishing, or announcing mq-ums.
 
+## When to use
+
+- Before tagging, publishing, or announcing a mq-ums release
+- After completing command, API, or security changes to verify version alignment and checks
+
+## When not to use
+
+- Regular development or feature work
+- Command additions without version bump — use `ums-command-safety-maintainer`
+- Debugging API or web UI behavior
+
+## Evals
+
+### Should trigger
+
+* "is mq-ums ready to release?"
+* "run the mq-ums release checklist"
+* "what's blocking the next mq-ums tag?"
+* "verify version, changelog, and npm validate before tagging mq-ums"
+
+### Should not trigger
+
+* "update mq-ums docs" → use `docs-maintainer`
+* "fix the PSIGEL integration" → use `psigel-integration-maintainer`
+* "update the web UI" → use `web-ui-maintainer`
+* "add a new UMS command" → use `ums-command-safety-maintainer`
+
 ## Always Inspect
 
 - `git status --short`

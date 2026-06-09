@@ -7,6 +7,19 @@ description: Use when keeping mq-ums README, command docs, architecture docs, se
 
 Keep mq-ums docs accurate because they describe safety-critical operational behavior.
 
+## When to use
+
+- Keeping README, command docs, security docs, PSIGEL notes, or changelog consistent with code
+- Syncing docs after command, API, or UI behavior changes
+- Checking for version badge drift or broken command surface examples
+
+## When not to use
+
+- Command catalog changes — use `ums-command-safety-maintainer`
+- Web UI changes — use `web-ui-maintainer`
+- PowerShell or PSIGEL integration changes — use `psigel-integration-maintainer`
+- Product positioning — use `repo-product-auditor`
+
 ## Docs Surfaces
 
 - `README.md`

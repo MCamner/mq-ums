@@ -7,6 +7,35 @@ description: Use when inspecting, explaining, planning, reviewing, or changing m
 
 Use this skill to ground work in mq-ums's local web UI, Node API, PowerShell, PSIGEL, and UMS safety model.
 
+## When to use
+
+- General work on mq-ums when no narrower skill clearly owns the task
+- Understanding the web UI, API, PowerShell, and PSIGEL safety architecture before acting
+- Planning or reviewing cross-surface changes
+
+## When not to use
+
+- Command additions — use `ums-command-safety-maintainer`
+- Web UI changes — use `web-ui-maintainer`
+- PSIGEL and PowerShell work — use `psigel-integration-maintainer`
+- Release validation — use `release-readiness`
+
+## Evals
+
+### Should trigger
+
+* "what does mq-ums do?"
+* "explain the mq-ums architecture and safety model"
+* "I'm new to mq-ums — what are the key surfaces?"
+* "what's the scope before I change the mq-ums API?"
+
+### Should not trigger
+
+* "update mq-ums docs" → use `docs-maintainer`
+* "add or change a UMS command" → use `ums-command-safety-maintainer`
+* "fix the PSIGEL integration" → use `psigel-integration-maintainer`
+* "is mq-ums ready to release?" → use `release-readiness`
+
 ## What This Repo Is
 
 `mq-ums` is a local web UI for managing IGEL UMS through PSIGEL. The browser calls a Node.js API, the API validates requests against `config/commands.json`, and a PowerShell runner invokes allowlisted PSIGEL commands.

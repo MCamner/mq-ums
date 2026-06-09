@@ -7,6 +7,18 @@ description: Use when adding, changing, reviewing, or documenting mq-ums command
 
 Use this skill for mq-ums's safety boundary: browser requests can only execute validated, allowlisted PSIGEL commands.
 
+## When to use
+
+- Adding, changing, reviewing, or auditing commands in `config/commands.json`
+- Checking PowerShell execution safety, dangerous command confirmation, auth, or audit logging
+- Reviewing for command injection, confirmation bypass, or allowlist drift
+
+## When not to use
+
+- Web UI styling or form behavior — use `web-ui-maintainer`
+- PowerShell install or credential setup — use `psigel-integration-maintainer`
+- General docs — use `docs-maintainer`
+
 ## Core Files
 
 - `config/commands.json`
