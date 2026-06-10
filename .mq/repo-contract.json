@@ -1,0 +1,10 @@
+{
+  "repo": "mq-ums",
+  "role": "ums-tooling",
+  "version": "0.1.4",
+  "status": "rc",
+  "contracts": [
+    "ums_command.v1"
+  ],
+  "next_focus": ""
+}
