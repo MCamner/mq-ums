@@ -36,6 +36,53 @@ Open `http://127.0.0.1:8787`. Verify connectivity at `http://127.0.0.1:8787/heal
 
 Start with read-only commands: `Get-UMSStatus`, `Get-UMSFirmware`, `Get-UMSDevice`.
 
+## Examples
+
+Read-only browser workflow:
+
+```text
+Command: Get-UMSStatus
+Args:    {}
+Confirm: not required
+Result:  JSON status from PSIGEL/UMS
+```
+
+Device lookup workflow:
+
+```text
+Command: Get-UMSDevice
+Args:    { "Id": "12345" }
+Confirm: not required
+Result:  JSON device details
+```
+
+Dangerous command workflow:
+
+```text
+Command: Restart-UMSDevice
+Args:    { "Id": "12345" }
+Confirm: RUN
+Result:  command runs only after explicit confirmation
+```
+
+---
+
+## Demo
+
+On a Windows management host with UMS access:
+
+```powershell
+npm run validate
+.\scripts\Test-PSIGEL.ps1 -UmsHost ums.example.com -CredPath C:\mq-ums\ums.cred.xml
+npm start
+```
+
+Open `http://127.0.0.1:8787`, run `Get-UMSStatus`, then verify the audit log in
+`logs/audit-YYYY-MM-DD.jsonl`. For a release demo, use the read-only live
+validation flow in [docs/LIVE_UMS_VALIDATION.md](docs/LIVE_UMS_VALIDATION.md).
+
+---
+
 ## Configuration
 
 | Variable | Description | Default |
@@ -100,6 +147,24 @@ No code changes needed — the runner is data-driven.
 - API binds to `127.0.0.1` by default
 
 See [docs/SECURITY.md](docs/SECURITY.md) and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
+## Contributing
+
+Keep changes safe-by-default. The browser must only run commands defined in
+`config/commands.json`, and dangerous commands must keep explicit confirmation.
+Before opening a PR, run:
+
+```bash
+npm run validate
+npm test
+./release-check.sh
+```
+
+For PowerShell changes, also validate on a Windows management host when the
+change touches PSIGEL or UMS connectivity. Update docs and examples whenever a
+command contract changes.
+
+---
 
 ## Roadmap
 
