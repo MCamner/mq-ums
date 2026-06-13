@@ -18,6 +18,9 @@
     .\scripts\Test-LiveUmsValidation.ps1 -EmitStatus .\out\ums_connection_status.v1.json
 #>
 [CmdletBinding()]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+    'PSAvoidUsingPlainTextForPassword', 'CredPath',
+    Justification = 'CredPath is a filesystem path to a DPAPI-encrypted credential file, not a password value.')]
 param(
     [string] $UmsHost = $env:MQ_UMS_HOST,
     [string] $UmsPort = $(if ($env:MQ_UMS_PORT) { $env:MQ_UMS_PORT } else { "8443" }),
@@ -82,8 +85,8 @@ function Check($Label, [scriptblock] $Block, $Key) {
     }
 }
 
-function Run-MqUmsCommand($CommandId, $PsCommand, $Args = @{}) {
-    $ArgsJson = $Args | ConvertTo-Json -Compress
+function Invoke-MqUmsCommand($CommandId, $PsCommand, $CommandArgs = @{}) {
+    $ArgsJson = $CommandArgs | ConvertTo-Json -Compress
     & $Runner `
         -CommandId $CommandId `
         -PsCommand $PsCommand `
@@ -145,15 +148,15 @@ Write-Host ""
 Write-Host "[check] live read-only commands"
 
 Check "Get-UMSStatus" {
-    Run-MqUmsCommand "get-status" "Get-UMSStatus"
+    Invoke-MqUmsCommand "get-status" "Get-UMSStatus"
 } "get_status_ok"
 
 Check "Get-UMSFirmware" {
-    Run-MqUmsCommand "get-firmware" "Get-UMSFirmware"
+    Invoke-MqUmsCommand "get-firmware" "Get-UMSFirmware"
 }
 
 Check "Get-UMSDevice" {
-    Run-MqUmsCommand "get-device" "Get-UMSDevice"
+    Invoke-MqUmsCommand "get-device" "Get-UMSDevice"
 }
 
 Write-Host ""
