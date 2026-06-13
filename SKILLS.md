@@ -12,6 +12,7 @@ flow.
 
 | Skill | Purpose |
 | --- | --- |
+| [command-template-library](skills/command-template-library/SKILL.md) | Add or change UMS commands through YAML contracts; the generator is the only path to `config/commands.json` and `docs/COMMANDS.md`. |
 | [docs-maintainer](skills/docs-maintainer/SKILL.md) | Keep README, command docs, architecture docs, security docs, PSIGEL notes, live validation docs, changelog, roadmap, and GitHub Pages consistent with code. |
 | [psigel-integration-maintainer](skills/psigel-integration-maintainer/SKILL.md) | Maintain PowerShell scripts, PSIGEL integration, Windows install flow, credential handling, live UMS validation, and operational troubleshooting docs. |
 | [release-readiness](skills/release-readiness/SKILL.md) | Prepare mq-ums for release by checking version sync, command config validation, tests, docs, security, live validation docs, and Git state. |
