@@ -19,6 +19,22 @@ Use this skill for mq-ums's safety boundary: browser requests can only execute v
 - PowerShell install or credential setup — use `psigel-integration-maintainer`
 - General docs — use `docs-maintainer`
 
+## Evals
+
+### Should trigger
+
+- "add a command to config/commands.json"
+- "does this command need a confirmation gate?"
+- "review the allowlist for injection risk"
+- "audit the dangerous-command confirmation flow"
+
+### Should not trigger
+
+- "style the command form" → use `web-ui-maintainer`
+- "fix the credential setup" → use `psigel-integration-maintainer`
+- "update the command docs" → use `docs-maintainer`
+- "generate a command from a YAML contract" → use `command-template-library`
+
 ## Core Files
 
 - `config/commands.json`

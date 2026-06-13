@@ -19,6 +19,21 @@ Use this skill for the Windows and PSIGEL side of mq-ums.
 - API or command safety changes — use `ums-command-safety-maintainer`
 - General docs — use `docs-maintainer`
 
+## Evals
+
+### Should trigger
+
+- "Invoke-UmsCommand.ps1 fails against live UMS"
+- "fix the Windows credential setup"
+- "the PSIGEL install flow needs updating"
+- "debug the live UMS validation step"
+
+### Should not trigger
+
+- "add a command to the catalog" → use `ums-command-safety-maintainer`
+- "fix the web UI form" → use `web-ui-maintainer`
+- "update the README" → use `docs-maintainer`
+
 ## Core Files
 
 - `scripts/Invoke-UmsCommand.ps1`

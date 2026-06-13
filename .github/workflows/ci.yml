@@ -36,6 +36,9 @@ jobs:
       - name: Read VERSION
         run: echo "VERSION=$(cat VERSION)" >> "$GITHUB_ENV"
 
+      - name: Check skills consistency
+        run: ./scripts/check-skills.sh
+
       - name: package.json version matches VERSION
         run: |
           PKG=$(node -p "require('./package.json').version")

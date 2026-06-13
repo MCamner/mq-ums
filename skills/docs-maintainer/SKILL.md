@@ -18,7 +18,22 @@ Keep mq-ums docs accurate because they describe safety-critical operational beha
 - Command catalog changes — use `ums-command-safety-maintainer`
 - Web UI changes — use `web-ui-maintainer`
 - PowerShell or PSIGEL integration changes — use `psigel-integration-maintainer`
-- Product positioning — use `repo-product-auditor`
+- Product positioning — run `repo-signal positioning`
+
+## Evals
+
+### Should trigger
+
+- "sync the README after the command surface changed"
+- "the version badge is stale"
+- "update the changelog for this release"
+- "do the documented commands match config/commands.json?"
+
+### Should not trigger
+
+- "add a command to the catalog" → use `ums-command-safety-maintainer`
+- "fix the web command form" → use `web-ui-maintainer`
+- "the PowerShell install flow is broken" → use `psigel-integration-maintainer`
 
 ## Docs Surfaces
 

@@ -19,6 +19,21 @@ Use this skill for the local browser UI under `web/`.
 - PowerShell or PSIGEL integration — use `psigel-integration-maintainer`
 - API server changes — use `ums-command-safety-maintainer`
 
+## Evals
+
+### Should trigger
+
+- "the dry-run flow in the web UI is confusing"
+- "improve the confirmation UX before a dangerous command"
+- "the JSON output display is hard to read"
+- "style the command form"
+
+### Should not trigger
+
+- "add a command to the catalog" → use `ums-command-safety-maintainer`
+- "fix the PowerShell runner" → use `psigel-integration-maintainer`
+- "update the README" → use `docs-maintainer`
+
 ## UI Role
 
 The UI is an operational control panel for IGEL UMS actions. It should be quiet, clear, and safety-forward rather than decorative.
