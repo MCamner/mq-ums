@@ -49,6 +49,16 @@
           <button id="refresh-btn" class="btn-ghost" type="button">Refresh</button>
         </section>
 
+        <!-- UMS connection status (ums_connection_status.v1, read-only) -->
+        <section id="ums-status-panel" class="health-panel">
+          <div>
+            <div class="section-kicker">UMS connection</div>
+            <div id="ums-status-summary" class="health-summary">Checking UMS status…</div>
+            <div id="ums-status-checks" class="ums-status-checks"></div>
+          </div>
+          <span id="ums-status-risk" class="ums-risk" title="Risk class from ums_connection_status.v1"></span>
+        </section>
+
         <!-- Command header -->
         <div id="cmd-header">
           <div>

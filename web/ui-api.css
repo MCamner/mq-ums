@@ -30,6 +30,35 @@
   margin-top: 8px;
 }
 
+/* UMS connection status (ums_connection_status.v1) */
+.ums-status-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  margin-top: 8px;
+}
+
+.ums-check {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.ums-check.ok { color: var(--success); }
+.ums-check.off { color: var(--muted2); }
+
+.ums-risk {
+  font-size: 12px;
+  font-family: var(--mono);
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+
+.ums-risk.ok { color: var(--success); border-color: rgba(63,185,80,.4); background: rgba(63,185,80,.08); }
+.ums-risk.unknown { color: var(--warn); border-color: rgba(227,179,65,.35); background: rgba(227,179,65,.08); }
+
 .cmd-item {
   width: 100%;
   background: transparent;

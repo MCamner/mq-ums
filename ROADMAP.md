@@ -248,6 +248,10 @@ real credentials and real UMS responses.
 - [x] Add troubleshooting for certificate/TLS problems
 - [x] Add troubleshooting for permissions errors
 - [x] Add live validation harness script
+- [x] Add `ums_connection_status.v1` read-only contract
+- [x] Emit `ums_connection_status.v1` from the validation harness (`-EmitStatus`)
+- [x] Expose status via read-only `GET /api/ums-status`
+- [x] Surface UMS connection status in the browser UI
 
 ### Recommended live test commands
 

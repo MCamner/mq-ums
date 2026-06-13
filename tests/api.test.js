@@ -65,6 +65,29 @@ test("GET /api/health is an alias for /health", withServer(async server => {
   assert.equal(body.ok, true);
 }));
 
+// ── UMS status ───────────────────────────────────────────────────────────────
+test("GET /api/ums-status returns the ums_connection_status.v1 contract", withServer(async server => {
+  const { status, body } = await get(server, "/api/ums-status");
+  assert.equal(status, 200);
+  assert.equal(body.schema, "ums_connection_status.v1");
+  assert.equal(body.source, "mq-ums");
+  assert.equal(body.mode, "read-only");
+  for (const key of ["ums_host_configured", "cred_file_present", "psigel_available",
+    "session_create_ok", "session_remove_ok", "get_status_ok"]) {
+    assert.equal(typeof body[key], "boolean", `${key} should be boolean`);
+  }
+  assert.ok(["low", "unknown"].includes(body.risk));
+  assert.ok(Array.isArray(body.findings));
+}));
+
+test("GET /api/ums-status body carries no secret markers", withServer(async server => {
+  const { body } = await get(server, "/api/ums-status");
+  const serialized = JSON.stringify(body).toLowerCase();
+  for (const marker of ["password", "token", "apikey", "api_key", "secret", "credential="]) {
+    assert.ok(!serialized.includes(marker), `status body must not contain "${marker}"`);
+  }
+}));
+
 // ── Commands ─────────────────────────────────────────────────────────────────
 test("GET /api/commands returns non-empty command list", withServer(async server => {
   const { status, body } = await get(server, "/api/commands");
