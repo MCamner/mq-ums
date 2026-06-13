@@ -325,6 +325,7 @@ Start with read-only operator flow:
 
 That slice is enough to prove daily usefulness without changing the safety
 model.
+
 - [ ] Add better loading states
 - [ ] Add better error messages from PowerShell failures
 - [ ] Add empty-state messages
