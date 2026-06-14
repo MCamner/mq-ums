@@ -4,7 +4,8 @@
   "version": "0.1.4",
   "status": "rc",
   "contracts": [
-    "ums_command.v1"
+    "ums_command.v1",
+    "ums_connection_status.v1"
   ],
-  "next_focus": ""
+  "next_focus": "live UMS validation run to flip ums_connection_status.v1 risk to low"
 }

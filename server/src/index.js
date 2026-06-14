@@ -15,6 +15,9 @@ const API_KEY = process.env.MQ_UMS_API_KEY || "";
 const SCRIPTS_DIR = path.resolve(__dirname, "../../scripts");
 const WEB_DIR = path.resolve(__dirname, "../../web");
 const VERSION = fs.readFileSync(path.resolve(__dirname, "../../VERSION"), "utf8").trim();
+// Where Test-LiveUmsValidation.ps1 -EmitStatus writes ums_connection_status.v1.
+const STATUS_PATH = process.env.MQ_UMS_STATUS_PATH
+  || path.resolve(__dirname, "../../out/ums_connection_status.v1.json");
 
 let commandMap;
 try {
@@ -50,6 +53,45 @@ function healthPayload() {
 
 app.get("/health", (req, res) => res.json(healthPayload()));
 app.get("/api/health", (req, res) => res.json(healthPayload()));
+
+// Read-only ums_connection_status.v1 (see docs/contracts/). This endpoint never
+// contacts UMS, spawns PowerShell, or reads credentials — it returns the last
+// status emitted by the live validation harness, or an honest "unproven" view
+// synthesized from local config. The contract guarantees no secrets in the body.
+function umsStatusPayload() {
+  try {
+    const doc = JSON.parse(fs.readFileSync(STATUS_PATH, "utf8"));
+    if (doc && doc.schema === "ums_connection_status.v1") {
+      return { ...doc, source: "mq-ums", emitted: true };
+    }
+  } catch {
+    // No emitted status yet — fall through to the synthesized default.
+  }
+
+  const credPath = process.env.MQ_UMS_CRED_PATH || "";
+  let credPresent = false;
+  if (credPath) {
+    try { credPresent = fs.existsSync(credPath); } catch { credPresent = false; }
+  }
+
+  return {
+    schema: "ums_connection_status.v1",
+    source: "mq-ums",
+    mode: "read-only",
+    generated_at: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
+    ums_host_configured: Boolean(process.env.MQ_UMS_HOST),
+    cred_file_present: credPresent,
+    psigel_available: false,
+    session_create_ok: false,
+    session_remove_ok: false,
+    get_status_ok: false,
+    risk: "unknown",
+    findings: ["Live UMS validation has not been run yet; run scripts/Test-LiveUmsValidation.ps1 -EmitStatus <path>"],
+    emitted: false,
+  };
+}
+
+app.get("/api/ums-status", requireApiKey, (req, res) => res.json(umsStatusPayload()));
 
 app.get("/api/commands", requireApiKey, (req, res) => {
   const list = Array.from(commandMap.values()).map(({ id, name, section, description, allowedArgs, danger, confirmText }) => ({

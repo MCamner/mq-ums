@@ -4,6 +4,9 @@
 const statusDot    = document.getElementById("status-dot");
 const statusLabel  = document.getElementById("status-label");
 const statusMeta   = document.getElementById("status-meta");
+const umsSummary   = document.getElementById("ums-status-summary");
+const umsChecks    = document.getElementById("ums-status-checks");
+const umsRisk      = document.getElementById("ums-status-risk");
 const refreshBtn   = document.getElementById("refresh-btn");
 const apiKeyBtn    = document.getElementById("api-key-btn");
 const apiKeyDialog = document.getElementById("api-key-dialog");
@@ -46,6 +49,7 @@ let running  = false;
 async function init() {
   updateApiKeyButton();
   await checkHealth();
+  await loadUmsStatus();
   await loadCommands();
   setInterval(checkHealth, 15000);
 }
@@ -67,6 +71,41 @@ async function checkHealth() {
     statusDot.className = "status-dot error";
     statusLabel.textContent = "offline";
     statusMeta.textContent = `API offline or unreachable: ${err.message}`;
+  }
+}
+
+// Read-only ums_connection_status.v1 — booleans + risk, no secrets.
+const UMS_CHECK_LABELS = {
+  ums_host_configured: "UMS host configured",
+  cred_file_present: "Credential file present",
+  psigel_available: "PSIGEL available",
+  session_create_ok: "Session create",
+  session_remove_ok: "Session teardown",
+  get_status_ok: "Get-UMSStatus",
+};
+
+async function loadUmsStatus() {
+  try {
+    const res = await fetch("/api/ums-status", { headers: apiHeaders(), signal: AbortSignal.timeout(4000) });
+    const data = await safeJson(res);
+    if (!res.ok || data.schema !== "ums_connection_status.v1") throw new Error(data.error || `HTTP ${res.status}`);
+
+    const risk = data.risk || "unknown";
+    umsRisk.textContent = `risk: ${risk}`;
+    umsRisk.className = `ums-risk ${risk === "low" ? "ok" : "unknown"}`;
+
+    const proven = data.emitted ? "validated" : "not yet validated";
+    umsSummary.textContent = `Read-only connection proof — ${proven} · ${data.findings?.[0] || ""}`;
+
+    umsChecks.innerHTML = Object.entries(UMS_CHECK_LABELS).map(([key, label]) => {
+      const on = data[key] === true;
+      return `<span class="ums-check ${on ? "ok" : "off"}">${on ? "✓" : "○"} ${escHtml(label)}</span>`;
+    }).join("");
+  } catch (err) {
+    umsRisk.textContent = "risk: unknown";
+    umsRisk.className = "ums-risk unknown";
+    umsSummary.textContent = `UMS status unavailable: ${err.message}`;
+    umsChecks.innerHTML = "";
   }
 }
 
@@ -323,6 +362,7 @@ async function runCommand() {
 runBtn.addEventListener("click", runCommand);
 refreshBtn.addEventListener("click", async () => {
   await checkHealth();
+  await loadUmsStatus();
   await loadCommands();
   showToast("API status refreshed");
 });
