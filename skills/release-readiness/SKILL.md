@@ -22,17 +22,17 @@ Use this skill before tagging, publishing, or announcing mq-ums.
 
 ### Should trigger
 
-* "is mq-ums ready to release?"
-* "run the mq-ums release checklist"
-* "what's blocking the next mq-ums tag?"
-* "verify version, changelog, and npm validate before tagging mq-ums"
+- "is mq-ums ready to release?"
+- "run the mq-ums release checklist"
+- "what's blocking the next mq-ums tag?"
+- "verify version, changelog, and npm validate before tagging mq-ums"
 
 ### Should not trigger
 
-* "update mq-ums docs" → use `docs-maintainer`
-* "fix the PSIGEL integration" → use `psigel-integration-maintainer`
-* "update the web UI" → use `web-ui-maintainer`
-* "add a new UMS command" → use `ums-command-safety-maintainer`
+- "update mq-ums docs" → use `docs-maintainer`
+- "fix the PSIGEL integration" → use `psigel-integration-maintainer`
+- "update the web UI" → use `web-ui-maintainer`
+- "add a new UMS command" → use `ums-command-safety-maintainer`
 
 ## Always Inspect
 

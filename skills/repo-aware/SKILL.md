@@ -24,17 +24,17 @@ Use this skill to ground work in mq-ums's local web UI, Node API, PowerShell, PS
 
 ### Should trigger
 
-* "what does mq-ums do?"
-* "explain the mq-ums architecture and safety model"
-* "I'm new to mq-ums — what are the key surfaces?"
-* "what's the scope before I change the mq-ums API?"
+- "what does mq-ums do?"
+- "explain the mq-ums architecture and safety model"
+- "I'm new to mq-ums — what are the key surfaces?"
+- "what's the scope before I change the mq-ums API?"
 
 ### Should not trigger
 
-* "update mq-ums docs" → use `docs-maintainer`
-* "add or change a UMS command" → use `ums-command-safety-maintainer`
-* "fix the PSIGEL integration" → use `psigel-integration-maintainer`
-* "is mq-ums ready to release?" → use `release-readiness`
+- "update mq-ums docs" → use `docs-maintainer`
+- "add or change a UMS command" → use `ums-command-safety-maintainer`
+- "fix the PSIGEL integration" → use `psigel-integration-maintainer`
+- "is mq-ums ready to release?" → use `release-readiness`
 
 ## What This Repo Is
 

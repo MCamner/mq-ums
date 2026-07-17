@@ -26,6 +26,7 @@ def restart_device(id: str) -> dict:
 ## Multi-arg example
 
 Contract:
+
 ```yaml
 id: "update-device"
 inputs:
@@ -39,6 +40,7 @@ python_wrapper: true
 ```
 
 Generated:
+
 ```python
 def update_device(id: str, name: str, site: str) -> dict:
     """
