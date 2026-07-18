@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+* `release-check.sh` now conforms to the `repo_release_check.v1` contract:
+  `--json` emits the machine-readable verdict (`schema`, `repo`, `status`,
+  `blockers`, `warnings`, `evidence`) on clean stdout and exits 0. Human mode is
+  unchanged. Lets mq-agent's `stack release --all --preflight` read the release
+  verdict.
+
 ## [0.1.4] - 2026-05-24
 
 ### Added
