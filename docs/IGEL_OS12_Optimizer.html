@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IGEL OS 12 Optimizer</title>
+<style>
+  :root{
+    --bg:#0f1720; --panel:#16212c; --panel2:#1c2a37; --border:#2a3b4a;
+    --text:#e6edf3; --muted:#8fa3b3; --accent:#3aa7ff; --accent2:#25c281;
+    --warn:#e5a337; --danger:#e5566d; --chip:#22323f;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);}
+  header{padding:22px 28px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,#132029,#0f1720);}
+  header h1{margin:0 0 4px 0;font-size:22px;}
+  header p{margin:0;color:var(--muted);font-size:13.5px;max-width:920px;line-height:1.5;}
+  .disclaimer{margin:16px 28px 0 28px;padding:12px 16px;background:#1d2530;border:1px solid #33465a;border-left:4px solid var(--warn);border-radius:6px;font-size:13px;color:#cbd7e0;line-height:1.55;}
+  .disclaimer b{color:#fff;}
+  .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:16px 28px;border-bottom:1px solid var(--border);background:#111b24;position:sticky;top:0;z-index:5;}
+  .toolbar .stat{font-size:12.5px;color:var(--muted);margin-right:auto;}
+  .toolbar .stat b{color:var(--text);}
+  button{cursor:pointer;border:1px solid var(--border);background:var(--panel2);color:var(--text);padding:8px 14px;border-radius:6px;font-size:13px;transition:.15s;}
+  button:hover{background:#23374a;border-color:var(--accent);}
+  button.primary{background:var(--accent);border-color:var(--accent);color:#04131f;font-weight:600;}
+  button.primary:hover{background:#5cb8ff;}
+  button.ghost{background:transparent;}
+  input[type=search]{background:var(--panel2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:6px;font-size:13px;width:220px;}
+  main{padding:20px 28px 60px 28px;max-width:1180px;margin:0 auto;}
+  .group{border:1px solid var(--border);border-radius:10px;margin-bottom:16px;overflow:hidden;background:var(--panel);}
+  .group-head{display:flex;align-items:center;gap:12px;padding:14px 18px;cursor:pointer;background:var(--panel2);}
+  .group-head:hover{background:#22323f;}
+  .group-head .chev{transition:.15s;color:var(--muted);}
+  .group.collapsed .chev{transform:rotate(-90deg);}
+  .group-head h2{margin:0;font-size:15px;flex:1;}
+  .group-head .path{font-size:12px;color:var(--muted);font-family:ui-monospace,Menlo,Consolas,monospace;}
+  .group-head .count{font-size:12px;background:var(--chip);padding:3px 9px;border-radius:20px;color:var(--muted);}
+  .group-body{padding:4px 0;}
+  .group.collapsed .group-body{display:none;}
+  .entry{display:flex;gap:14px;padding:13px 18px;border-top:1px solid var(--border);}
+  .entry:hover{background:#182531;}
+  .entry input[type=checkbox]{margin-top:3px;width:16px;height:16px;accent-color:var(--accent2);flex-shrink:0;}
+  .entry .body{flex:1;min-width:0;}
+  .entry .row1{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
+  .entry .name{font-weight:600;font-size:14px;}
+  .entry .rec{font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:20px;font-weight:700;}
+  .rec.recommended{background:rgba(37,194,129,.15);color:var(--accent2);}
+  .rec.optional{background:rgba(229,163,55,.15);color:var(--warn);}
+  .entry .desc{color:var(--muted);font-size:13px;margin-top:4px;line-height:1.5;}
+  .entry .meta{margin-top:7px;display:flex;gap:16px;flex-wrap:wrap;font-size:12px;}
+  .entry .meta span{color:var(--muted);}
+  .entry .meta code{background:var(--chip);padding:2px 6px;border-radius:4px;color:#bcd6ea;font-family:ui-monospace,Menlo,Consolas,monospace;}
+  .entry .meta a{color:var(--accent);text-decoration:none;}
+  .entry .meta a:hover{text-decoration:underline;}
+  #reportView{display:none;}
+  #reportView h2{border-bottom:2px solid var(--border);padding-bottom:8px;}
+  .report-table{width:100%;border-collapse:collapse;margin-top:14px;font-size:13px;}
+  .report-table th,.report-table td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:top;}
+  .report-table th{color:var(--muted);font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;}
+  .report-summary{display:flex;gap:14px;margin:16px 0;flex-wrap:wrap;}
+  .report-summary .card{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px 18px;min-width:140px;}
+  .report-summary .card .n{font-size:26px;font-weight:700;}
+  .report-summary .card .l{font-size:12px;color:var(--muted);}
+  footer{padding:24px 28px;color:var(--muted);font-size:12px;border-top:1px solid var(--border);}
+  footer a{color:var(--accent);}
+  @media print{
+    header,.toolbar,.disclaimer,footer,#checklistView{display:none !important;}
+    #reportView{display:block !important;}
+    body{background:#fff;color:#000;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>IGEL OS 12 Optimizer <span style="color:var(--muted);font-weight:400;font-size:14px;">— checklista &amp; profilunderlag</span></h1>
+  <p>Inspirerad av Citrix Optimizer: kategoriserade regler du kan bocka av, en sammanfattande rapport och export — men anpassad till hur IGEL OS 12 faktiskt fungerar.</p>
+</header>
+
+<div class="disclaimer">
+  <b>Skillnad mot Citrix Optimizer, läs innan du använder:</b> Citrix Optimizer körs lokalt på en Windows-VDA, läser/skriver register och tjänster direkt, och kan rulla tillbaka ändringar. IGEL OS 12 är ett låst, image-baserat Linux-system som normalt <b>inte</b> ska petas i lokalt — allt sköts via <b>UMS-profiler</b> (Profile Configurator) som pushas till enheter. Den här appen kör därför inte några live-ändringar mot din enhet eller UMS-server. Den genererar istället en <b>granskad checklista</b> med verifierade menyvägar ur IGEL:s officiella Knowledge Base (källor längst ner) som du eller din UMS-admin sätter i Profile Configurator. Exakta registernycklar för OS 12 publiceras inte i klartext av IGEL (sök dem via <code>System &gt; Registry</code>-sökfältet på en testenhet/i UMS) — därför anges menyväg och rekommenderat värde, inte gissade nyckelsträngar.
+</div>
+
+<div class="toolbar">
+  <input type="search" id="search" placeholder="Sök inställning…">
+  <button id="selRec">Välj rekommenderade</button>
+  <button id="selAll">Välj alla</button>
+  <button id="selNone">Rensa val</button>
+  <span class="stat"><b id="selCount">0</b> av <b id="totalCount">0</b> valda</span>
+  <button id="btnReport" class="primary">Generera rapport</button>
+  <button id="btnCsv" class="ghost">Exportera CSV</button>
+  <button id="btnJson" class="ghost">Exportera JSON</button>
+</div>
+
+<main>
+  <div id="checklistView"></div>
+
+  <div id="reportView">
+    <h2>IGEL OS 12 – Optimeringsrapport</h2>
+    <p id="reportMeta" style="color:var(--muted);font-size:13px;"></p>
+    <div class="report-summary" id="reportSummary"></div>
+    <div id="reportBody"></div>
+    <p style="margin-top:24px;"><button onclick="window.print()">Skriv ut / Spara som PDF</button> <button onclick="showChecklist()">Tillbaka till checklistan</button></p>
+  </div>
+</main>
+
+<footer>
+  Byggd som ett fristående, offline HTML-verktyg (ingen data skickas någonstans). Innehållet bygger på IGEL Knowledge Base (kb.igel.com) för IGEL OS 12 / UMS Web App, hämtat juli 2026. Verifiera alltid mot din egen UMS-version innan produktionsutrullning — vissa parametrar/menyer skiljer sig mellan IGEL OS-versioner.
+</footer>
+
+<script>
+const DATA = [
+  {
+    id:"remote-access",
+    name:"Fjärråtkomst & Shadowing",
+    path:"System > Remote Access",
+    source:"https://kb.igel.com/en/igel-os-base-system/current/remote-access-in-igel-os-12",
+    entries:[
+      {name:"SSH Access", rec:true,
+        desc:"SSH till enheten bör vara avstängt som standard och endast slås på tillfälligt för felsökning. Ett kvarglömt aktivt SSH är en onödig attackyta på en kioskliknande enhet.",
+        loc:"System > Remote Access > SSH Access", value:"Inaktiverat (aktivera tillfälligt vid behov)",
+        src:"https://kb.igel.com/en/igel-os-base-system/current/ssh-access-in-igel-os-12"},
+      {name:"Shadow Settings (fjärrvisning/skugga skärm)", rec:true,
+        desc:"Fjärrskuggning låter en admin se/ta över skärmen. Lämna avstängt om ni inte aktivt använder funktionen för supportärenden, eller begränsa den till specifika admin-IP/lösenord.",
+        loc:"System > Remote Access > Shadow Settings", value:"Inaktiverat, eller lösenordsskyddat + begränsat",
+        src:"https://kb.igel.com/en/igel-os-base-system/current/shadow-settings-in-igel-os-12"},
+      {name:"Secure Terminal", rec:true,
+        desc:"Lokal terminal-åtkomst på enheten bör vara avstängd för vanliga användare i produktionsmiljö, så att en fysiskt närvarande person inte kan öppna ett skal.",
+        loc:"System > Remote Access > Secure Terminal", value:"Inaktiverat för slutanvändare",
+        src:"https://kb.igel.com/en/igel-os-base-system/current/secure-terminal-in-igel-os-12"}
+    ]
+  },
+  {
+    id:"remote-mgmt",
+    name:"UMS / Remote Management",
+    path:"System > Remote Management",
+    source:"https://kb.igel.com/en/igel-os-base-system/current/remote-management-in-igel-os-12",
+    entries:[
+      {name:'"igelrmserver" som DNS-fallback', rec:false,
+        desc:"Om ni redan konfigurerar UMS-servrar explicit (statisk lista) behöver ni inte fallback via DNS-namnet igelrmserver. Att stänga av det minskar onödiga anrop och risken att en enhet av misstag registrerar sig mot fel UMS på ett nätverk där någon råkar publicera det DNS-namnet.",
+        loc:"System > Remote Management > Options > Use \"igelrmserver\" as fallback", value:"Avaktiverat om UMS-adresser redan är explicit satta",
+        src:"https://kb.igel.com/en/igel-os-base-system/current/options-of-remote-management-in-igel-os-12"},
+      {name:"Log message severity mot UMS", rec:false,
+        desc:"Lämna på \"off\" (standard) i normal drift. Debug/info genererar onödig trafik och belastning — höj bara tillfälligt vid felsökning.",
+        loc:"System > Remote Management > Log message severity", value:"off (default) i produktion",
+        src:"https://kb.igel.com/en/igel-os-base-system/current/remote-management-in-igel-os-12"},
+      {name:"Visa UMS-anslutningsstatus i aktivitetsfältet", rec:false,
+        desc:"Kosmetisk städning: ikonen är praktisk vid felsökning men kan stängas av i strikt kioskläge för en renare skrivbordsyta.",
+        loc:"System > Remote Management > Show UMS connection status tray icon on desktop", value:"Av i strikt kioskläge, annars kvar",
+        src:"https://kb.igel.com/en/igel-os-base-system/current/remote-management-in-igel-os-12"}
+    ]
+  },
+  {
+    id:"licensing",
+    name:"Licenshantering",
+    path:"UMS Administration > Global Configuration > Licenses",
+    source:"https://kb.igel.com/en/igel-subscription-and-more/current/igel-license-management",
+    entries:[
+      {name:"Automatisk licensutdelning (ALD) i stället för manuell", rec:true,
+        desc:"Vid större utrullningar: använd Automatic License Deployment (helst med ALD-token) i stället för att manuellt ladda upp licensfiler per Unit ID. Minskar risken att nya/ombytta enheter blir stående olicensierade och därmed nedgraderade i funktion.",
+        loc:"UMS Administration > Global Configuration > Licenses > Automatic License Deployment", value:"Aktivera ALD (med ALD-token) för nya enheter",
+        src:"https://kb.igel.com/en/igel-subscription-and-more/current/setting-up-automatic-license-deployment-ald-with-a"},
+      {name:"Identifiera enheter som saknar giltig licens", rec:true,
+        desc:"Kör regelbundet igenom listan över enheter som saknar en giltig OS-licens (t.ex. efter hårdvarubyte, factory reset eller import av nya devices) innan de hamnar i produktion utan att någon märker det.",
+        loc:"UMS Administration > Licenses (device overview)", value:"Schemalägg en regelbunden kontroll, t.ex. månadsvis",
+        src:"https://kb.igel.com/en/igel-subscription-and-more/current/how-to-find-devices-which-need-licenses"},
+      {name:"Bevaka utgångsdatum för licens/prenumeration", rec:true,
+        desc:"IGEL-licenser är prenumerationsbaserade. Håll koll på förnyelsedatum i IGEL License Portal (ILP) så att enheter inte tappar licens och funktion mitt i drift när en prenumeration löper ut.",
+        loc:"IGEL License Portal (ILP)", value:"Bevaka utgångsdatum, förnya i god tid",
+        src:"https://kb.igel.com/en/igel-subscription-and-more/current/igel-license-portal-ilp"},
+      {name:"UMS-servern själv licensierad", rec:false,
+        desc:"Separat från OS-licenser för enheterna: kontrollera att UMS-instansen har en giltig UMS-licens, annars kan hanteringen av anslutna enheter påverkas.",
+        loc:"UMS Administration > Global Configuration > Licenses > UMS Licenses", value:"Verifiera giltig UMS-licens",
+        src:"https://kb.igel.com/en/igel-subscription-and-more/current/how-to-license-the-igel-ums"}
+    ]
+  },
+  {
+    id:"updates",
+    name:"Appuppdateringar",
+    path:"System > Update",
+    source:"https://kb.igel.com/en/igel-os-base-system/current/update-app-update-settings-in-igel-os-12",
+    entries:[
+      {name:"Kontrollera uppdateringar för icke-pinnade appar vid varje boot", rec:false,
+        desc:"Standard är att kontrollera uppdateringar vid varje omstart. IGEL:s egen dokumentation rekommenderar att i stället schemalägga kontroller (crontab-syntax) för att undvika att många enheter belastar nätverket/App Portal-repot samtidigt vid t.ex. massuppstart på morgonen.",
+        loc:"System > Update > Check for and download updates for non pinned apps on given calendar time", value:"Schemalägg via crontab i stället för \"vid varje boot\" i större miljöer",
+        src:"https://kb.igel.com/en/igel-os-base-system/current/update-app-update-settings-in-igel-os-12"},
+      {name:"Bandbreddsgräns vid uppdatering", rec:true,
+        desc:"Aktivera bandbreddsbegränsning för nedladdning av app-uppdateringar så att massutrullning inte mättar nätverket, särskilt över WAN/tunna länkar.",
+        loc:"System > Update > Use a bandwidth limit while updating", value:"Aktiverat, t.ex. 2MB (default) eller lägre",
+        src:"https://kb.igel.com/en/igel-os-base-system/current/update-app-update-settings-in-igel-os-12"},
+      {name:"Endast UMS-distribuerade repositories", rec:false,
+        desc:"Om UMS agerar Update Proxy: begränsa enheten till att bara hämta appar via repon som UMS proxar, i stället för fritt mot alla konfigurerade repon. Minskar attackyta och beroende av extern anslutning. Kräver UMS 12.04.110+.",
+        loc:"System > Update > Use only repositories deployed by the UMS", value:"Aktiverat om UMS agerar Update Proxy",
+        src:"https://kb.igel.com/en/igel-os-base-system/current/update-app-update-settings-in-igel-os-12"}
+    ]
+  },
+  {
+    id:"power",
+    name:"Strömhantering",
+    path:"System > Power Options",
+    source:"https://kb.igel.com/en/igel-os-base-system/current/power-options-in-igel-os-12",
+    entries:[
+      {name:"Display Power Management (skärmavstängning vid inaktivitet)", rec:true,
+        desc:"Konfigurera att skärmen stängs av / går till viloläge efter en rimlig inaktivitetstid. Minskar strömförbrukning och skärmens livslängd (burn-in) på enheter som står påslagna hela dagen.",
+        loc:"System > Power Options > Display Power Management", value:"Timeout satt enligt er policy (t.ex. 10–15 min)",
+        src:"https://kb.igel.com/en/igel-os-base-system/current/display-power-management-in-igel-os-12"},
+      {name:"System Power Options (vänteläge/suspend)", rec:false,
+        desc:"Se över om enheten ska gå i viloläge utanför kontorstid, kontra att stå på för schemalagda UMS-jobb/uppdateringar nattetid. Balansera mot era underhållsfönster.",
+        loc:"System > Power Options > System Power Options", value:"Anpassa efter drifttider och underhållsfönster",
+        src:"https://kb.igel.com/en/igel-os-base-system/current/system-power-options-in-igel-os-12"},
+      {name:"Shutdown Settings", rec:false,
+        desc:"Bekräfta att avstängningsbeteendet (t.ex. vem som får stänga av/starta om lokalt) matchar er säkerhetspolicy för delade/publika enheter.",
+        loc:"System > Power Options > Shutdown Settings", value:"Granska mot policy",
+        src:"https://kb.igel.com/en/igel-os-base-system/current/shutdown-settings-in-igel-os-12"}
+    ]
+  },
+  {
+    id:"screenlock",
+    name:"Skärmlås & Skärmsläckare",
+    path:"User Interface > Desktop > Screenlock / Screensaver",
+    source:"https://kb.igel.com/en/igel-os-base-system/12.4/screenlock-screensaver-in-igel-os-12",
+    entries:[
+      {name:"Automatisk aktivering av skärmlås", rec:true,
+        desc:"Se till att skärmlåset (separat inställning från ren skärmsläckare) aktiveras automatiskt vid inaktivitet på delade eller publikt åtkomliga enheter, så att en obevakad session inte lämnas öppen.",
+        loc:"User Interface > Desktop > Screenlock / Screensaver > Options", value:"Aktiverat med rimlig timeout",
+        src:"https://kb.igel.com/en/igel-os-base-system/12.4/screenlock-screensaver-in-igel-os-12"}
+    ]
+  },
+  {
+    id:"usb",
+    name:"USB-enheter & lagring",
+    path:"Devices > USB Access Control / Devices > Storage Devices",
+    source:"https://kb.igel.com/en/igel-os-base-system/12.4/usb-access-control-in-igel-os-12",
+    entries:[
+      {name:"Aktivera USB Access Control + Default rule: Deny", rec:false,
+        desc:"Endast om er säkerhetspolicy kräver det: aktivera USB-åtkomstkontroll, sätt Default rule till Deny, och lägg sedan explicita Allow-regler för de USB-klasser/enheter (t.ex. tangentbord, mus, kortläsare) som faktiskt behövs. IGEL avråder från att slå på detta förrän ni verifierat att skrivare/UC-enheter/redirection fungerar som förväntat, eftersom det annars kan blockera enheter användarna behöver.",
+        loc:"Devices > USB Access Control", value:"Av som standard; aktivera medvetet + testa Allow-listan innan produktion",
+        src:"https://kb.igel.com/en/igel-os-base-system/12.4/usb-access-control-in-igel-os-12"},
+      {name:"Storage Hotplug – Default permission för USB-minnen", rec:false,
+        desc:"Standard är Read/Write för hotplug-lagring (USB-minnen, MMC-läsare). Om policyn kräver dataskydd mot okontrollerad export, sätt till Read only i stället — separat från själva USB Access Control-funktionen.",
+        loc:"Devices > Storage Devices > Storage Hotplug > Default permission", value:"Read only om policyn kräver det, annars Read/Write (default)",
+        src:"https://kb.igel.com/en/igel-os-base-system/12.4/storage-hotplug-in-igel-os-12"},
+      {name:"Dynamisk client drive mapping för hotplug-lagring", rec:false,
+        desc:"Styr om ett inkopplat USB-minne automatiskt blir en drive i ICA-/RDP-/Horizon-sessionen. Stäng av om användare inte ska kunna mappa in lokala USB-minnen i fjärrsessioner, oavsett vad som gäller för lokal montering på enheten.",
+        loc:"Devices > Storage Devices > Storage Hotplug > Enable dynamic client drive mapping", value:"Av om USB-lagring inte ska nå fjärrsessioner",
+        src:"https://kb.igel.com/en/igel-os-base-system/12.4/storage-hotplug-in-igel-os-12"},
+      {name:"Safely Remove Hardware tillgänglig för användare", rec:true,
+        desc:"Säkerställ att funktionen för att säkert koppla ur USB-lagring är åtkomlig (aktivitetsfält/in-session-kontrollrad/hotkey). Okontrollerad urkoppling av hotplug-lagring kan skada data.",
+        loc:"Devices > Storage Devices > Safely Remove Hardware", value:"Aktiverad och synlig för användaren",
+        src:"https://kb.igel.com/en/igel-os-base-system/12.4/storage-hotplug-in-igel-os-12"},
+      {name:"Hotplug-ljud/meddelande vid in-/urkoppling", rec:false,
+        desc:"Kosmetisk/UX-inställning: ljudsignal och popup-meddelande vid inkoppling av USB-lagring är påslaget som standard. Kan stängas av i tysta kioskmiljöer, men underlättar felsökning om det lämnas på.",
+        loc:"Devices > Storage Devices > Storage Hotplug > Hotplug beep / Hotplug message", value:"Policyberoende, default på",
+        src:"https://kb.igel.com/en/igel-os-base-system/12.4/storage-hotplug-in-igel-os-12"}
+    ]
+  },
+  {
+    id:"logging",
+    name:"Loggning",
+    path:"System > Logging",
+    source:"https://kb.igel.com/en/igel-os-base-system/current/logging-in-igel-os-12",
+    entries:[
+      {name:"Persistent log-partition rätt dimensionerad", rec:false,
+        desc:"Om lokal loggning + persistent partition är aktiverat, kontrollera att storleken (MB) är rimlig för er retention-policy — för stor partition äter onödigt av den begränsade lagringen, för liten roterar bort loggar för snabbt vid felsökning.",
+        loc:"System > Logging > Partition size in MB", value:"Anpassa storlek efter behov, undvik onödigt stora värden",
+        src:"https://kb.igel.com/en/igel-os-base-system/current/logging-in-igel-os-12"},
+      {name:"Remote mode: Off om ni inte kör syslog-insamling", rec:false,
+        desc:"Om ni inte aktivt samlar in syslog centralt, lämna Remote mode på Off (default) i stället för Client/Server, så enheten inte skickar/tar emot loggtrafik i onödan.",
+        loc:"System > Logging > Remote mode", value:"Off, om ingen syslog-lösning används",
+        src:"https://kb.igel.com/en/igel-os-base-system/current/logging-in-igel-os-12"}
+    ]
+  },
+  {
+    id:"customization",
+    name:"Städning av anpassningar",
+    path:"System > System Customization",
+    source:"https://kb.igel.com/en/igel-os-base-system/current/system-customization-in-igel-os-12",
+    entries:[
+      {name:"Granska Custom Partition-innehåll", rec:false,
+        desc:"Motsvarar Citrix Optimizers \"ta bort onödiga schemalagda uppgifter\": gå igenom vad som faktiskt ligger i er Custom Partition och körs vid boot. Gamla test-skript eller överflödiga binärer ökar boot-tid och attackyta utan att tillföra värde.",
+        loc:"System > System Customization > Custom Partition", value:"Ta bort skript/filer som inte längre används",
+        src:"https://kb.igel.com/en/igel-os-base-system/current/custom-partition-in-igel-os-12"},
+      {name:"Granska Custom Commands", rec:false,
+        desc:"Kontrollera att egna kommandon som körs vid start/inloggning fortfarande behövs. Överflödiga kommandon förlänger uppstarts-/inloggningstid.",
+        loc:"System > System Customization > Custom Commands", value:"Rensa bort inaktuella kommandon",
+        src:"https://kb.igel.com/en/igel-os-base-system/current/custom-commands-in-igel-os-12"},
+      {name:"Granska Custom CronJob/Systemd Timer", rec:false,
+        desc:"Kontrollera schemalagda jobb (cron/systemd timer) som konfigurerats lokalt — samma tanke som Citrix Optimizers grupp \"Disable Scheduled Tasks\": ta bort eller glesa ut jobb som körs oftare än nödvändigt.",
+        loc:"System > System Customization > Custom CronJob/Systemd Timer", value:"Ta bort/glesa ut onödigt frekventa jobb",
+        src:"https://kb.igel.com/en/igel-os-base-system/current/custom-cronjob-systemd-timer-in-igel-os-12"},
+      {name:"Städa oanvända Environment Variables", rec:false,
+        desc:"Miljövariabler som satts för en app/integration som inte längre används bör tas bort för att hålla konfigurationen begriplig och undvika oväntade sidoeffekter vid framtida app-uppdateringar.",
+        loc:"System > System Customization > Environment Variables", value:"Ta bort oanvända poster",
+        src:"https://kb.igel.com/en/igel-os-base-system/current/environment-variables-in-igel-os-12"}
+    ]
+  },
+  {
+    id:"printers",
+    name:"Skrivare (CUPS)",
+    path:"Apps > CUPS Printing",
+    source:"https://kb.igel.com/en/igel-apps/current/configuration-of-cups-printing-on-igel-os",
+    entries:[
+      {name:"CUPS Web Interface avstängt utanför felsökning", rec:true,
+        desc:"Webbgränssnittet för CUPS (port 631) är avstängt som standard och kräver att ett root-lösenord är satt för att kunna slås på. Lämna det av i normal drift och slå bara på tillfälligt vid felsökning av utskriftsköer.",
+        loc:"Apps > CUPS Printing > CUPS Printing Global > Enable CUPS Web Interface", value:"Av (default), aktivera endast tillfälligt",
+        src:"https://kb.igel.com/en/igel-apps/current/configuration-of-cups-printing-on-igel-os"},
+      {name:"Begränsa delning av lokala skrivare i nätverket", rec:true,
+        desc:"\"Network or host for sharing local printers\" avgör vilka som kan skriva ut via den här enhetens lokalt anslutna skrivare. Lämna på None om ni inte medvetet delar ut skrivaren, eller begränsa till Local network i stället för Global.",
+        loc:"Apps > CUPS Printing > CUPS Printing Global > Network or host for sharing local printers", value:"None (default), annars snävast möjliga scope",
+        src:"https://kb.igel.com/en/igel-apps/current/configuration-of-cups-printing-on-igel-os"},
+      {name:"Använd USB Printer Class i stället för positionsnumrerade portar", rec:true,
+        desc:"Vid UMS-drivna profiler: undvik \"1st/2nd USB printer\" eftersom numreringen beror på i vilken ordning skrivaren registreras och kan skifta mellan omstarter. Använd i stället \"USB class printer\" som matchar på mönster, särskilt om flera USB-skrivare kan förekomma.",
+        loc:"Apps > CUPS Printing > Printer > Printer port", value:"USB class printer i stället för positionsbaserad USB printer",
+        src:"https://kb.igel.com/en/igel-apps/current/configuration-of-cups-printing-on-igel-os"},
+      {name:"Dynamisk standardskrivare för mobila arbetsplatser", rec:false,
+        desc:"Praktisk i hot-desking-scenarion: senast inkopplade USB-/USB class-skrivare sätts automatiskt som standardskrivare. Fungerar bara tillförlitligt om en skrivare är inkopplad åt gången (IGEL:s egen begränsning) — testa innan ni aktiverar i miljöer med flera samtidiga skrivare.",
+        loc:"Apps > CUPS Printing > CUPS Printing Global > Dynamic default for printers using USB or USB class port", value:"Av (default); aktivera medvetet för mobila arbetsplatser",
+        src:"https://kb.igel.com/en/igel-apps/current/configuration-of-cups-printing-on-igel-os"},
+      {name:"Granska vilka skrivare som mappas in i Citrix-/AVD-sessioner", rec:false,
+        desc:"\"Map printer in Citrix sessions\" och \"Map printer in AVD sessions\" är på som standard per skrivare. Gå igenom listan så bara skrivare som faktiskt ska vara valbara i fjärrsessioner exponeras — annars får användaren en lång, förvirrande skrivarlista i sessionen.",
+        loc:"Apps > CUPS Printing > Printer > Map printer in Citrix sessions / Map printer in AVD sessions", value:"Endast på för avsedda skrivare",
+        src:"https://kb.igel.com/en/igel-apps/current/configuration-of-cups-printing-on-igel-os"}
+    ]
+  },
+  {
+    id:"citrix",
+    name:"Citrix Workspace App / HDX",
+    path:"Apps > Citrix > Global Settings",
+    source:"https://kb.igel.com/en/igel-apps/current/configuration-of-the-citrix-workspace-app-on-igel-",
+    entries:[
+      {name:"Native USB Redirection: Default rule Deny + Allow-listor", rec:true,
+        desc:"Samma princip som lokal USB Access Control, men specifikt för vad som får redirectas in i en Citrix-session. IGEL:s egen rekommendation är Default rule = Deny, med explicita Allow-/Connect-regler per klass eller enhet (Vendor/Product ID) för det som faktiskt behövs.",
+        loc:"Apps > Citrix > Global Settings > Native USB Redirection > Default rule", value:"Deny (default) + riktade Allow-regler",
+        src:"https://kb.igel.com/en/igel-apps/current/configuration-of-the-citrix-workspace-app-on-igel-"},
+      {name:"HDX Multimedia redirection (klient-side avkodning)", rec:true,
+        desc:"Aktivera så att multimediainnehåll avkodas på tunna klienten i stället för på Citrix-servern, om enheten har hårdvarustöd. Avlastar servern och ger ofta bättre upplevd prestanda för video/ljud i sessionen. Standard är avstängt (avkodning på servern).",
+        loc:"Apps > Citrix > Global Settings > HDX Multimedia > Multimedia redirection", value:"Aktiverat om klientens hårdvara stödjer det",
+        src:"https://kb.igel.com/en/igel-apps/current/configuration-of-the-citrix-workspace-app-on-igel-"},
+      {name:"Microsoft Teams-optimering", rec:true,
+        desc:"Aktivera den virtuella kanalen för Teams-optimering om Microsoft Teams används inom Citrix-sessioner, så att ljud/video hanteras lokalt på klienten i stället för att belasta VDA-servern. Avstängt som standard.",
+        loc:"Apps > Citrix > Global Settings > HDX Multimedia > Microsoft Teams optimization", value:"Aktiverat om Teams används i sessionen",
+        src:"https://kb.igel.com/en/igel-apps/current/configuration-of-the-citrix-workspace-app-on-igel-"},
+      {name:"Browser content redirection", rec:false,
+        desc:"Låter definierat webbinnehåll renderas lokalt på klienten i stället för på servern, vilket minskar serverlast. Kräver att er BCR-policy/webbplatslista är konfigurerad korrekt på Citrix-sidan innan ni slår på detta lokalt.",
+        loc:"Apps > Citrix > Global Settings > HDX Multimedia > Browser content redirection", value:"Aktivera i samråd med er Citrix-administratör",
+        src:"https://kb.igel.com/en/igel-apps/current/configuration-of-the-citrix-workspace-app-on-igel-"},
+      {name:"Auto reconnect – rimligt antal försök/fördröjning", rec:false,
+        desc:"Standard är 3 återanslutningsförsök med 30 sekunders fördröjning. Granska att värdena passar er nätverksstabilitet — för aggressiv återanslutning kan dölja underliggande nätverksproblem, för försiktig ger onödigt lång väntan för användaren.",
+        loc:"Apps > Citrix > Global Settings > Options > Auto reconnect / Maximum retries / Delay in seconds before reconnecting", value:"Granska mot er nätverksmiljö (default: 3 försök / 30 s)",
+        src:"https://kb.igel.com/en/igel-apps/current/configuration-of-the-citrix-workspace-app-on-igel-"},
+      {name:"Autentiseringsmetod matchad mot SSO-strategi", rec:false,
+        desc:"Credential passthrough/IGEL login för SSO kräver att registerparametern app.cwa.authman.protocols.httpbasic.enabled är aktiv (standard är aktiverad) samt HTTPS i Store URL, och gäller bara Citrix on-premises (inte molnlösningen). Verifiera att vald metod per session faktiskt matchar er inloggningskedja.",
+        loc:"Apps > Citrix > [session] > Authentication  ·  registernyckel: app.cwa.authman.protocols.httpbasic.enabled", value:"Matcha metod mot AD/Kerberos-SSO respektive on-prem/cloud",
+        src:"https://kb.igel.com/en/igel-apps/current/configuration-of-the-citrix-workspace-app-on-igel-"},
+      {name:"Granska Client Drive Mapping-listan", rec:false,
+        desc:"Varje mappad drive (inklusive lokala kataloger och USB-lagring) blir tillgänglig i Citrix-sessionen. Gå igenom listan så bara nödvändiga sökvägar exponeras in i sessionen — motsvarar Citrix Optimizers tanke om att inte lämna kvar oanvänd funktionalität påslagen.",
+        loc:"Apps > Citrix > Global Settings > Client Drive Mapping", value:"Endast avsedda drives/sökvägar mappade",
+        src:"https://kb.igel.com/en/igel-apps/current/configuration-of-the-citrix-workspace-app-on-igel-"}
+    ]
+  }
+];
+
+let selected = new Set();
+
+function entryKey(g,e){return g.id+"::"+e.name;}
+
+function render(){
+  const list = document.getElementById('checklistView');
+  list.innerHTML = '';
+  let total=0;
+  DATA.forEach(g=>{
+    total += g.entries.length;
+    const div = document.createElement('div');
+    div.className='group';
+    div.dataset.gid = g.id;
+    const allSel = g.entries.every(e=>selected.has(entryKey(g,e)));
+    div.innerHTML = `
+      <div class="group-head" onclick="toggleCollapse('${g.id}')">
+        <span class="chev">&#9660;</span>
+        <h2>${g.name}</h2>
+        <span class="path">${g.path}</span>
+        <span class="count">${g.entries.length} regler</span>
+      </div>
+      <div class="group-body">
+        ${g.entries.map(e=>{
+          const key = entryKey(g,e);
+          const checked = selected.has(key) ? 'checked' : '';
+          return `<div class="entry" data-key="${key}">
+            <input type="checkbox" ${checked} onchange="onToggle('${key}')">
+            <div class="body">
+              <div class="row1">
+                <span class="name">${e.name}</span>
+                <span class="rec ${e.rec?'recommended':'optional'}">${e.rec?'Rekommenderas':'Valfritt / policyberoende'}</span>
+              </div>
+              <div class="desc">${e.desc}</div>
+              <div class="meta">
+                <span>Plats: <code>${e.loc}</code></span>
+                <span>Rekommenderat värde: <b>${e.value}</b></span>
+                <a href="${e.src}" target="_blank" rel="noopener">Källa ↗</a>
+              </div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>`;
+    list.appendChild(div);
+  });
+  document.getElementById('totalCount').textContent = total;
+  updateSelCount();
+}
+
+function toggleCollapse(gid){
+  const el = document.querySelector(`.group[data-gid="${gid}"]`);
+  el.classList.toggle('collapsed');
+}
+
+function onToggle(key){
+  const el = document.querySelector(`.entry[data-key="${key}"] input`);
+  if(el.checked) selected.add(key); else selected.delete(key);
+  updateSelCount();
+}
+
+function updateSelCount(){
+  document.getElementById('selCount').textContent = selected.size;
+}
+
+function selectRecommended(){
+  selected.clear();
+  DATA.forEach(g=>g.entries.forEach(e=>{ if(e.rec) selected.add(entryKey(g,e)); }));
+  render();
+}
+function selectAll(){
+  selected.clear();
+  DATA.forEach(g=>g.entries.forEach(e=>selected.add(entryKey(g,e))));
+  render();
+}
+function selectNone(){
+  selected.clear();
+  render();
+}
+
+function getSelectedItems(){
+  const items=[];
+  DATA.forEach(g=>g.entries.forEach(e=>{
+    const key=entryKey(g,e);
+    if(selected.has(key)){
+      items.push({category:g.name, path:g.path, name:e.name, location:e.loc, value:e.value, description:e.desc, source:e.src});
+    }
+  }));
+  return items;
+}
+
+function showChecklist(){
+  document.getElementById('checklistView').style.display='block';
+  document.getElementById('reportView').style.display='none';
+}
+
+function generateReport(){
+  const items = getSelectedItems();
+  if(items.length===0){ alert('Välj minst en inställning innan du genererar en rapport.'); return; }
+  document.getElementById('checklistView').style.display='none';
+  const rv = document.getElementById('reportView');
+  rv.style.display='block';
+  document.getElementById('reportMeta').textContent =
+    `Genererad ${new Date().toLocaleString('sv-SE')} · ${items.length} inställningar valda · Applicera manuellt via UMS Profile Configurator (Configuration > din profil).`;
+
+  const byCat = {};
+  items.forEach(i=>{ byCat[i.category]=(byCat[i.category]||0)+1; });
+  document.getElementById('reportSummary').innerHTML =
+    `<div class="card"><div class="n">${items.length}</div><div class="l">Valda inställningar</div></div>` +
+    Object.keys(byCat).map(c=>`<div class="card"><div class="n">${byCat[c]}</div><div class="l">${c}</div></div>`).join('');
+
+  document.getElementById('reportBody').innerHTML = `
+    <table class="report-table">
+      <thead><tr><th>Kategori</th><th>Inställning</th><th>Plats i IGEL Setup/UMS</th><th>Rekommenderat värde</th><th>Källa</th></tr></thead>
+      <tbody>
+        ${items.map(i=>`<tr>
+          <td>${i.category}</td>
+          <td><b>${i.name}</b><br><span style="color:var(--muted)">${i.description}</span></td>
+          <td><code>${i.location}</code></td>
+          <td>${i.value}</td>
+          <td><a href="${i.source}" target="_blank" rel="noopener">kb.igel.com ↗</a></td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
+function download(filename, content, mime){
+  const blob = new Blob([content], {type:mime});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+function exportCsv(){
+  const items = getSelectedItems();
+  if(items.length===0){ alert('Välj minst en inställning innan du exporterar.'); return; }
+  const esc = s => `"${String(s).replace(/"/g,'""')}"`;
+  const header = ['Kategori','Inställning','Plats','Rekommenderat värde','Beskrivning','Källa'];
+  const rows = items.map(i=>[i.category,i.name,i.location,i.value,i.description,i.source].map(esc).join(','));
+  const csv = [header.join(','), ...rows].join('\r\n');
+  download('igel-os12-optimizer-profil.csv', '﻿'+csv, 'text/csv;charset=utf-8');
+}
+
+function exportJson(){
+  const items = getSelectedItems();
+  if(items.length===0){ alert('Välj minst en inställning innan du exporterar.'); return; }
+  const payload = {
+    generated: new Date().toISOString(),
+    tool: "IGEL OS 12 Optimizer",
+    note: "Underlag för manuell konfiguration i IGEL UMS Profile Configurator. Inga live-ändringar har gjorts mot någon enhet.",
+    settings: items
+  };
+  download('igel-os12-optimizer-profil.json', JSON.stringify(payload,null,2), 'application/json');
+}
+
+document.getElementById('selRec').onclick = selectRecommended;
+document.getElementById('selAll').onclick = selectAll;
+document.getElementById('selNone').onclick = selectNone;
+document.getElementById('btnReport').onclick = generateReport;
+document.getElementById('btnCsv').onclick = exportCsv;
+document.getElementById('btnJson').onclick = exportJson;
+document.getElementById('search').addEventListener('input', e=>{
+  const q = e.target.value.toLowerCase().trim();
+  document.querySelectorAll('.entry').forEach(el=>{
+    const txt = el.textContent.toLowerCase();
+    el.style.display = txt.includes(q) ? 'flex' : 'none';
+  });
+});
+
+render();
+selectRecommended();
+</script>
+</body>
+</html>
