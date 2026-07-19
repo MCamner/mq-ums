@@ -7,5 +7,6 @@
     "ums_command.v1",
     "ums_connection_status.v1"
   ],
-  "next_focus": "live UMS validation run to flip ums_connection_status.v1 risk to low"
+  "next_focus": "live UMS validation run to flip ums_connection_status.v1 risk to low",
+  "release_mode": "direct"
 }
