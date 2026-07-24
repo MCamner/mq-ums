@@ -162,6 +162,29 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (window.Babel && typeof window.Babel.transformScriptTags === 'function') {
       window.Babel.transformScriptTags();
     }
+
+    // mq-ums: permanent safety banner. This page is an UNGOVERNED dev/debug
+    // tool — the operator types a UMS address + credentials directly into the
+    // browser, bypassing the local Node allowlist. It is NOT the governed
+    // operator console (that is the served web/ app). See ROADMAP.md v0.2.0.
+    // Own try/catch so a banner failure can never break the app render.
+    try {
+      var __mqBanner = document.createElement('div');
+      __mqBanner.id = '__mq_safety_banner';
+      __mqBanner.textContent =
+        '⚠ DEV / DEBUG TOOL — ungoverned. You enter the UMS address and ' +
+        'credentials directly in the browser, bypassing the allowlist. This is ' +
+        'NOT the governed operator console (the served web/ app) — not for ' +
+        'production use.';
+      __mqBanner.style.cssText =
+        'position:fixed;top:0;left:0;right:0;z-index:2147483647;' +
+        'font:600 12px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;' +
+        'color:#1a1200;background:#f5b02e;padding:6px 14px;text-align:center;' +
+        'box-shadow:0 1px 4px rgba(0,0,0,0.3);border-bottom:1px solid #b3801f;';
+      (document.body || document.documentElement).appendChild(__mqBanner);
+    } catch (bannerErr) {
+      console.error('[mq-ums] safety banner injection failed:', bannerErr);
+    }
   } catch (err) {
     setStatus('Error unpacking: ' + err.message);
     console.error('Bundle unpack error:', err);

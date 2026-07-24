@@ -273,7 +273,7 @@ npm start
 Then in browser:
 
 ```text
-http://127.0.0.1:3000
+http://127.0.0.1:8787
 ```
 
 ### Definition of done
@@ -302,6 +302,17 @@ Design boundary:
 The browser UI may make existing allowlisted commands easier to discover,
 repeat and inspect. It must not introduce arbitrary PowerShell, bypass
 confirmation text, or weaken audit logging.
+
+The governed operator console already exists as the served `web/` app
+(`web/index.html` + `web/app.js`). It talks only to the local Node API
+(`/api/health`, `/api/ums-status`, `/api/commands`, `/api/run`) same-origin,
+holds no UMS credentials in the browser (only a local `x-api-key`), and runs
+only allowlisted commands. v0.2.0 hardens that surface; it does not build a
+new one.
+
+`docs/IGEL-UMS-Console.html` is a separate, ungoverned dev/debug tool where the
+operator enters a UMS address and credentials directly in the browser. It is
+not part of this milestone and must not be promoted to the operator console.
 
 ### Planned scope
 
