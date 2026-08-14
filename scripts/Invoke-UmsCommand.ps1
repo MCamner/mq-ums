@@ -45,7 +45,7 @@ try {
 try {
     $credential = Import-Clixml -Path $CredPath
 } catch {
-    Write-JsonError "Failed to load credential from $CredPath: $_"
+    Write-JsonError "Failed to load credential from ${CredPath}: $_"
     exit 1
 }
 

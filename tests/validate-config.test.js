@@ -83,3 +83,12 @@ test("throws on duplicate id", () => {
     /Duplicate/
   );
 });
+
+test("PowerShell runner delimits CredPath before a colon", () => {
+  const runner = fs.readFileSync(
+    path.resolve(__dirname, "../scripts/Invoke-UmsCommand.ps1"),
+    "utf8",
+  );
+
+  assert.doesNotMatch(runner, /\$CredPath:/);
+});

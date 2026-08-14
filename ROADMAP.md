@@ -39,10 +39,10 @@ Every dangerous command must require explicit confirmation.
 
 ## Current status
 
-Current release candidate:
+Current release:
 
 ```text
-v0.1.4 — live UMS validation
+v0.1.4 — released; live environment validation pending
 ```
 
 Current capability:
@@ -97,7 +97,7 @@ v0.2.0 should prioritize:
 | v0.1.1  | Local UI and command catalog foundation | Done    |
 | v0.1.2  | Health, dry-run and audit foundation    | Done    |
 | v0.1.3  | Docs, CI and validation hardening       | Done    |
-| v0.1.4  | Live UMS validation                     | RC      |
+| v0.1.4  | Live UMS validation                     | Released; live validation pending |
 | v0.2.0  | Daily-use operator UI                   | Planned |
 | v0.3.0  | Safety profiles and command governance  | Planned |
 | v0.4.0  | Device fleet workflows                  | Planned |
@@ -266,7 +266,7 @@ Get-UMSDevice
 ```bash
 npm test
 npm run validate
-npm run lint
+./release-check.sh
 npm start
 ```
 
@@ -286,8 +286,8 @@ http://127.0.0.1:8787
 - [ ] No secret leakage found
 - [x] `docs/LIVE_UMS_VALIDATION.md` exists
 - [x] README includes live validation status
-- [ ] GitHub Actions pass
-- [ ] GitHub release `v0.1.4` exists
+- [x] GitHub Actions pass
+- [x] GitHub release `v0.1.4` exists
 
 ---
 
