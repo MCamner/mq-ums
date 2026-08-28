@@ -43,6 +43,14 @@ path is set in `.env` as `MQ_UMS_CRED_PATH` and is never logged.
 
 Set `MQ_UMS_API_KEY` in `.env` to require `X-Api-Key: <key>` on all API calls.
 Leave empty to disable (safe when binding to 127.0.0.1 only).
+The key is accepted only through the header, never through a querystring.
+
+## Audit and history redaction
+
+Audit rows store command metadata and argument names, never argument values or
+raw UMS results. `/api/history` exposes only contract-valid redacted rows.
+PowerShell errors are redacted before they enter either the API response or the
+audit metadata.
 
 ## Recommendations
 

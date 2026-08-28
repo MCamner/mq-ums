@@ -33,10 +33,21 @@ const runHint      = document.getElementById("run-hint");
 const outputPlaceholder = document.getElementById("output-placeholder");
 const outputEl     = document.getElementById("output");
 const copyBtn      = document.getElementById("copy-btn");
+const copySummaryBtn = document.getElementById("copy-summary-btn");
 const clearBtn     = document.getElementById("clear-btn");
 const resultMeta   = document.getElementById("result-meta");
 const toast        = document.getElementById("toast");
 const dryrunCheck  = document.getElementById("dryrun-check");
+const freshCheck   = document.getElementById("fresh-check");
+const devicePanel  = document.getElementById("device-panel");
+const deviceSearch = document.getElementById("device-search");
+const deviceList   = document.getElementById("device-list");
+const deviceCount  = document.getElementById("device-count");
+const devicePage   = document.getElementById("device-page");
+const devicePrev   = document.getElementById("device-prev");
+const deviceNext   = document.getElementById("device-next");
+const historyList  = document.getElementById("history-list");
+const historyRefresh = document.getElementById("history-refresh");
 
 // ── State ───────────────────────────────────────────────────────────────────
 const API_KEY_STORAGE = "mqUmsApiKey";
@@ -44,6 +55,9 @@ let apiKey   = localStorage.getItem(API_KEY_STORAGE) || "";
 let commands = [];
 let current  = null;
 let running  = false;
+let lastOutcome = null;
+let deviceResults = [];
+let currentDevicePage = 1;
 
 // ── Init ─────────────────────────────────────────────────────────────────────
 async function init() {
@@ -51,6 +65,7 @@ async function init() {
   await checkHealth();
   await loadUmsStatus();
   await loadCommands();
+  await loadHistory();
   setInterval(checkHealth, 15000);
 }
 
@@ -82,6 +97,10 @@ const UMS_CHECK_LABELS = {
   session_create_ok: "Session create",
   session_remove_ok: "Session teardown",
   get_status_ok: "Get-UMSStatus",
+  api_health_ok: "Node API health",
+  api_commands_ok: "Command catalog API",
+  api_run_ok: "Read-only API execution",
+  audit_history_ok: "Correlated audit history",
 };
 
 async function loadUmsStatus() {
@@ -276,6 +295,8 @@ function updateDryRunState() {
   if (!current) return;
 
   const liveDanger = current.danger && !dryrunCheck.checked;
+  freshCheck.disabled = current.danger || dryrunCheck.checked || !current.cacheTtlSeconds;
+  if (freshCheck.disabled) freshCheck.checked = false;
   confirmBox.classList.toggle("hidden", !liveDanger);
   runBtn.classList.toggle("danger-mode", liveDanger);
   confirmWord.textContent = current.confirmText || "RUN";
@@ -323,7 +344,12 @@ async function runCommand() {
   clearOutput();
   showPlaceholder(false);
 
-  const body = { commandId: current.id, args: getArgs(), dryRun: dryrunCheck.checked };
+  const body = {
+    commandId: current.id,
+    args: getArgs(),
+    dryRun: dryrunCheck.checked,
+    bypassCache: freshCheck.checked,
+  };
   if (current.danger && !dryrunCheck.checked) body.confirmText = confirmInput.value;
 
   try {
@@ -336,18 +362,24 @@ async function runCommand() {
     const elapsedMs = Math.round(performance.now() - started);
 
     if (!res.ok) {
-      showError(data.error || JSON.stringify(data));
+      showError(data.error?.message || data.error || JSON.stringify(data));
       resultMeta.textContent = `failed · ${elapsedMs} ms`;
-    } else if (data.dryRun) {
-      showJson({ dryRun: true, preview: data.preview });
+    } else if (data.dry_run) {
+      lastOutcome = data;
+      showJson(data.data);
       resultMeta.textContent = `dry-run · ${elapsedMs} ms`;
       copyBtn.classList.remove("hidden");
+      copySummaryBtn.classList.remove("hidden");
     } else {
-      const payload = data.result ?? data.raw ?? data;
+      lastOutcome = data;
+      const payload = data.data;
       showJson(payload);
-      resultMeta.textContent = `success · ${elapsedMs} ms`;
+      resultMeta.textContent = `${data.status} · ${data.source} · ${data.duration_ms} ms`;
       copyBtn.classList.remove("hidden");
+      copySummaryBtn.classList.remove("hidden");
+      if (current.id === "get-device") renderDeviceResults(payload);
     }
+    await loadHistory();
   } catch (err) {
     showError(`Request failed: ${err.message}`);
     resultMeta.textContent = "request failed";
@@ -418,8 +450,70 @@ function clearOutput() {
   outputEl.classList.add("hidden");
   outputPlaceholder.style.display = "";
   copyBtn.classList.add("hidden");
+  copySummaryBtn.classList.add("hidden");
   resultMeta.textContent = "";
+  devicePanel.classList.add("hidden");
 }
+
+function renderDeviceResults(data) {
+  deviceResults = UmsResultModel.normalizeDevices(data);
+  currentDevicePage = 1;
+  devicePanel.classList.remove("hidden");
+  renderDevicePage();
+}
+
+function renderDevicePage() {
+  const view = UmsResultModel.filterAndPaginate(deviceResults, {
+    query: deviceSearch.value,
+    page: currentDevicePage,
+    pageSize: 25,
+  });
+  currentDevicePage = view.page;
+  deviceCount.textContent = `${view.total} matching device(s)`;
+  devicePage.textContent = `Page ${view.page} of ${view.pages}`;
+  devicePrev.disabled = view.page <= 1;
+  deviceNext.disabled = view.page >= view.pages;
+  deviceList.innerHTML = "";
+  for (const device of view.items) {
+    const row = document.createElement("details");
+    const summary = document.createElement("summary");
+    summary.textContent = String(device.Name || device.name || device.Id || device.id || "Device");
+    const pre = document.createElement("pre");
+    pre.textContent = JSON.stringify(device, null, 2);
+    row.append(summary, pre);
+    deviceList.appendChild(row);
+  }
+  if (!view.items.length) deviceList.textContent = "No matching devices";
+}
+
+deviceSearch.addEventListener("input", () => { currentDevicePage = 1; renderDevicePage(); });
+devicePrev.addEventListener("click", () => { currentDevicePage--; renderDevicePage(); });
+deviceNext.addEventListener("click", () => { currentDevicePage++; renderDevicePage(); });
+
+async function loadHistory() {
+  try {
+    const res = await fetch("/api/history?limit=20", { headers: apiHeaders() });
+    const data = await safeJson(res);
+    if (!res.ok || data.schema !== "ums_command_history.v1") throw new Error(data.error || res.status);
+    historyList.innerHTML = "";
+    for (const entry of data.entries) {
+      const row = document.createElement("div");
+      row.className = "history-row";
+      row.textContent = `${entry.started_at} · ${entry.command_id} · ${entry.status} · ${entry.source} · ${entry.duration_ms} ms`;
+      historyList.appendChild(row);
+    }
+    if (!data.entries.length) historyList.textContent = "No contract-valid history yet";
+  } catch (error) {
+    historyList.textContent = `History unavailable: ${error.message}`;
+  }
+}
+
+historyRefresh.addEventListener("click", loadHistory);
+copySummaryBtn.addEventListener("click", async () => {
+  if (!lastOutcome) return;
+  await navigator.clipboard.writeText(UmsResultModel.shortSummary(lastOutcome));
+  showToast("Summary copied");
+});
 
 function showJson(data) {
   const text = typeof data === "string" ? data : JSON.stringify(data, null, 2);

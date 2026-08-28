@@ -3,7 +3,7 @@
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const http = require("node:http");
-const { app } = require("../server/src/index");
+const { app, createRequireApiKey } = require("../server/src/index");
 
 function get(server, urlPath) {
   const { port } = server.address();
@@ -73,7 +73,8 @@ test("GET /api/ums-status returns the ums_connection_status.v1 contract", withSe
   assert.equal(body.source, "mq-ums");
   assert.equal(body.mode, "read-only");
   for (const key of ["ums_host_configured", "cred_file_present", "psigel_available",
-    "session_create_ok", "session_remove_ok", "get_status_ok"]) {
+    "session_create_ok", "session_remove_ok", "get_status_ok", "api_health_ok",
+    "api_commands_ok", "api_run_ok", "audit_history_ok"]) {
     assert.equal(typeof body[key], "boolean", `${key} should be boolean`);
   }
   assert.ok(["low", "unknown"].includes(body.risk));
@@ -141,9 +142,9 @@ test("POST /api/run dryRun=true returns preview without spawning PowerShell", wi
     dryRun: true,
   });
   assert.equal(status, 200);
-  assert.equal(body.ok, true);
-  assert.equal(body.dryRun, true);
-  assert.equal(body.preview.command, "Get-UMSStatus");
+  assert.equal(body.schema, "ums_command_result.v1");
+  assert.equal(body.dry_run, true);
+  assert.equal(body.data.preview.command, "Get-UMSStatus");
 }));
 
 test("POST /api/run dryRun=true for dangerous command skips confirmText", withServer(async server => {
@@ -153,7 +154,38 @@ test("POST /api/run dryRun=true for dangerous command skips confirmText", withSe
     dryRun: true,
   });
   assert.equal(status, 200);
-  assert.equal(body.dryRun, true);
-  assert.equal(body.preview.command, "Restart-UMSDevice");
-  assert.deepEqual(body.preview.args, { Id: "12345" });
+  assert.equal(body.dry_run, true);
+  assert.equal(body.data.preview.command, "Restart-UMSDevice");
+  assert.deepEqual(body.data.preview.args, { Id: "12345" });
 }));
+
+test("POST /api/run rejects unknown argument names", withServer(async server => {
+  const { status, body } = await post(server, "/api/run", {
+    commandId: "get-status", args: { Surprise: "value" }, dryRun: true,
+  });
+  assert.equal(status, 400);
+  assert.match(body.error, /Unknown argument/);
+}));
+
+test("GET /api/history returns the redacted history contract", withServer(async server => {
+  const { status, body } = await get(server, "/api/history?limit=5");
+  assert.equal(status, 200);
+  assert.equal(body.schema, "ums_command_history.v1");
+  assert.ok(Array.isArray(body.entries));
+  for (const entry of body.entries) {
+    assert.ok(!("args" in entry));
+    assert.ok(!("data" in entry));
+  }
+}));
+
+test("API-key middleware accepts headers only, never querystrings", () => {
+  const middleware = createRequireApiKey("expected");
+  let status = 0;
+  const res = { status(code) { status = code; return this; }, json() { return this; } };
+  let next = false;
+  middleware({ headers: {}, query: { apiKey: "expected" } }, res, () => { next = true; });
+  assert.equal(status, 401);
+  assert.equal(next, false);
+  middleware({ headers: { "x-api-key": "expected" }, query: {} }, res, () => { next = true; });
+  assert.equal(next, true);
+});

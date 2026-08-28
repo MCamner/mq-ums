@@ -44,13 +44,14 @@ From the repo root:
 npm test
 npm run validate
 .\scripts\Test-PSIGEL.ps1 -UmsHost $env:MQ_UMS_HOST -UmsPort $env:MQ_UMS_PORT -CredPath $env:MQ_UMS_CRED_PATH
-.\scripts\Test-LiveUmsValidation.ps1
 ```
 
-Then start the local app:
+Start the governed local app, then prove the complete API path:
 
 ```powershell
 npm start
+.\scripts\Test-LiveUmsValidation.ps1 -ViaApi `
+  -EmitStatus .\out\ums_connection_status.v1.json
 ```
 
 Open:
@@ -77,6 +78,14 @@ http://127.0.0.1:8787
 - [ ] `get-device` dry-run returns `Get-UMSDevice`
 - [ ] Dry-run does not spawn PSIGEL execution
 - [ ] Dry-run writes audit entry with `dryRun: true`
+
+### Governed API path
+
+- [ ] `/api/health` returns OK
+- [ ] `/api/commands` returns the validated allowlist
+- [ ] Three read-only commands return `ums_command_result.v1` with `source: live`
+- [ ] `/api/history` contains all three correlated request IDs
+- [ ] History contains no argument values, raw result data or secrets
 
 ### Live read-only commands
 

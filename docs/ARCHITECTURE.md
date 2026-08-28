@@ -24,6 +24,7 @@ args fields, handles confirm dialog for dangerous commands, displays JSON output
 - `GET /health` / `GET /api/health` — readiness check: version, bind, commandsLoaded, env config flags
 - `GET /api/commands` — returns allowlisted command definitions
 - `POST /api/run` — validates commandId, args, confirmText, spawns PowerShell (or returns dry-run preview if `dryRun: true`)
+- `GET /api/history` — bounded, redacted `ums_command_history.v1`; no raw results or argument values
 - Serves static web UI
 - Optional API key via `MQ_UMS_API_KEY`
 - Binds to `127.0.0.1` by default
@@ -33,6 +34,18 @@ args fields, handles confirm dialog for dangerous commands, displays JSON output
 Every `/api/run` call (including dry runs) appends a JSONL entry to `logs/audit-YYYY-MM-DD.jsonl`.
 Fields logged: timestamp, commandId, psCommand, sanitized args, dangerous, dryRun, status, durationMs.
 Credentials, raw output, and env secrets are never written to the log.
+API responses and history rows correlate by `request_id`.
+
+### Command service (`server/src/command-service.js`)
+
+The single execution path behind `/api/run`. It owns catalog lookup, argument
+filtering, confirmation, PowerShell invocation, `ums_command_result.v1`, audit
+correlation and read-only cache lookup. Dangerous commands never use cache.
+
+### Result cache (`server/src/result-cache.js`)
+
+Bounded in-memory cache for commands whose allowlist entry declares
+`cacheTtlSeconds`. Cache hits are audited and keep the originating request ID.
 
 ### Config (`config/commands.json`)
 

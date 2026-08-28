@@ -24,6 +24,14 @@
   --sidebar-w: 240px;
 }
 
+.operator-panel { margin-top: 20px; padding: 16px; border: 1px solid var(--border, #30363d); border-radius: 8px; }
+.operator-panel-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; }
+.operator-panel-header input { min-width: 260px; }
+.device-list, .history-list { display: grid; gap: 8px; }
+.device-list details, .history-row { padding: 8px 10px; border: 1px solid var(--border, #30363d); border-radius: 6px; }
+.device-list pre { overflow: auto; white-space: pre-wrap; }
+.pager { display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 12px; }
+
 html, body, #app { height: 100%; }
 body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; overflow: hidden; }
 

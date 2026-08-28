@@ -114,7 +114,9 @@ Get-UMSDevice
 Run it on a Windows management host that can reach IGEL UMS:
 
 ```powershell
-.\scripts\Test-LiveUmsValidation.ps1
+npm start
+.\scripts\Test-LiveUmsValidation.ps1 -ViaApi `
+  -EmitStatus .\out\ums_connection_status.v1.json
 ```
 
 See [docs/LIVE_UMS_VALIDATION.md](docs/LIVE_UMS_VALIDATION.md) for the full

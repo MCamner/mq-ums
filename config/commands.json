@@ -7,6 +7,7 @@
       "psCommand": "Get-UMSStatus",
       "allowedArgs": [],
       "danger": false,
+      "cacheTtlSeconds": 30,
       "description": "Returns UMS server status, version, and build information."
     },
     {
@@ -16,6 +17,7 @@
       "psCommand": "Get-UMSFirmware",
       "allowedArgs": ["Id"],
       "danger": false,
+      "cacheTtlSeconds": 30,
       "description": "Lists all firmware versions registered in UMS. Pass Id to get a specific version."
     },
     {
@@ -25,6 +27,7 @@
       "psCommand": "Get-UMSDevice",
       "allowedArgs": ["Id", "Filter"],
       "danger": false,
+      "cacheTtlSeconds": 30,
       "description": "Lists devices. Pass Id for a single device. Filter: short (default) | details | online | shadow | deviceattributes | networkadapters."
     },
     {
@@ -114,6 +117,7 @@
       "psCommand": "Get-UMSDeviceDirectory",
       "allowedArgs": ["Id", "Filter"],
       "danger": false,
+      "cacheTtlSeconds": 30,
       "description": "Lists device directories. Pass Id for a specific directory. Filter: children to include child elements."
     },
     {
@@ -163,6 +167,7 @@
       "psCommand": "Get-UMSProfile",
       "allowedArgs": ["Id"],
       "danger": false,
+      "cacheTtlSeconds": 30,
       "description": "Lists all profiles registered in UMS. Pass Id for a specific profile."
     },
     {
@@ -202,6 +207,7 @@
       "psCommand": "Get-UMSProfileDirectory",
       "allowedArgs": ["Id", "Filter"],
       "danger": false,
+      "cacheTtlSeconds": 30,
       "description": "Lists profile directories. Pass Id for a specific directory. Filter: children to include child elements."
     },
     {
@@ -251,6 +257,7 @@
       "psCommand": "Get-UMSDeviceAssignment",
       "allowedArgs": ["Id"],
       "danger": false,
+      "cacheTtlSeconds": 30,
       "description": "Lists all profiles currently assigned to a specific device. Requires device Id."
     },
     {
@@ -260,6 +267,7 @@
       "psCommand": "Get-UMSDeviceDirectoryAssignment",
       "allowedArgs": ["Id"],
       "danger": false,
+      "cacheTtlSeconds": 30,
       "description": "Lists all profiles assigned to a device directory. Requires directory Id."
     },
     {
@@ -269,6 +277,7 @@
       "psCommand": "Get-UMSProfileAssignment",
       "allowedArgs": ["Id"],
       "danger": false,
+      "cacheTtlSeconds": 30,
       "description": "Lists all devices and directories that a profile is assigned to. Requires profile Id."
     },
     {

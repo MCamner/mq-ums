@@ -24,6 +24,9 @@ jobs:
       - name: Validate commands.json
         run: node server/src/validate-config.js
 
+      - name: Validate command contracts
+        run: python3 tools/validate-command-contracts.py
+
       - name: Run tests
         run: npm test
 

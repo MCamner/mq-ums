@@ -89,6 +89,10 @@
               <input type="checkbox" id="dryrun-check">
               <span>Dry run</span>
             </label>
+            <label class="dryrun-toggle" title="Bypass read-only cache for this request">
+              <input type="checkbox" id="fresh-check">
+              <span>Fresh</span>
+            </label>
             <button id="run-btn" disabled>
               <span id="run-label">Run</span>
               <span id="run-spinner" class="spinner hidden"></span>
@@ -106,6 +110,7 @@
             </div>
             <div class="output-actions">
               <button id="copy-btn" class="btn-ghost hidden">Copy</button>
+              <button id="copy-summary-btn" class="btn-ghost hidden">Copy summary</button>
               <button id="clear-btn" class="btn-ghost">Clear</button>
             </div>
           </div>
@@ -117,6 +122,27 @@
             <pre id="output" class="hidden"></pre>
           </div>
         </div>
+
+        <section id="device-panel" class="operator-panel hidden">
+          <div class="operator-panel-header">
+            <div><div class="section-kicker">Devices</div><span id="device-count"></span></div>
+            <input type="search" id="device-search" placeholder="Filter returned devices…">
+          </div>
+          <div id="device-list" class="device-list"></div>
+          <div class="pager">
+            <button id="device-prev" class="btn-ghost">Previous</button>
+            <span id="device-page"></span>
+            <button id="device-next" class="btn-ghost">Next</button>
+          </div>
+        </section>
+
+        <section id="history-panel" class="operator-panel">
+          <div class="operator-panel-header">
+            <div><div class="section-kicker">History</div><span>Redacted server audit</span></div>
+            <button id="history-refresh" class="btn-ghost">Refresh</button>
+          </div>
+          <div id="history-list" class="history-list"></div>
+        </section>
 
       </main>
 
@@ -140,6 +166,7 @@
   <!-- Toast -->
   <div id="toast"></div>
 
+  <script src="result-model.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

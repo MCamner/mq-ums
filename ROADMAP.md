@@ -305,7 +305,7 @@ confirmation text, or weaken audit logging.
 
 The governed operator console already exists as the served `web/` app
 (`web/index.html` + `web/app.js`). It talks only to the local Node API
-(`/api/health`, `/api/ums-status`, `/api/commands`, `/api/run`) same-origin,
+(`/api/health`, `/api/ums-status`, `/api/commands`, `/api/run`, `/api/history`) same-origin,
 holds no UMS credentials in the browser (only a local `x-api-key`), and runs
 only allowlisted commands. v0.2.0 hardens that surface; it does not build a
 new one.
@@ -316,18 +316,22 @@ not part of this milestone and must not be promoted to the operator console.
 
 ### Planned scope
 
-- [ ] Improve device list view
-- [ ] Add pagination for large device lists
-- [ ] Add search/filter in browser UI
-- [ ] Add response caching for read-only commands
-- [ ] Add command history in UI
-- [ ] Add command result detail view
-- [ ] Add copy result as JSON
-- [ ] Add copy command summary
-- [ ] Add operator-friendly empty/error states
-- [ ] Add UI tests for search/filter/history behavior
-- [ ] Keep dangerous command confirmation unchanged
-- [ ] Keep audit events for cached and repeated command usage
+- [x] Improve device list view
+- [x] Add pagination for large device lists
+- [x] Add search/filter in browser UI
+- [x] Add response caching for read-only commands
+- [x] Add command history in UI
+- [x] Add command result detail view
+- [x] Add copy result as JSON
+- [x] Add copy command summary
+- [x] Add operator-friendly empty/error states
+- [x] Add UI model tests for search/filter/history behavior
+- [x] Keep dangerous command confirmation unchanged
+- [x] Keep audit events for cached and repeated command usage
+
+Implementation is complete on the integrated operator-flow branch. Live UMS
+acceptance remains open until the Windows `-ViaApi` gate emits current,
+redacted `ums_connection_status.v1` evidence.
 
 ### First implementation slice
 
@@ -363,12 +367,12 @@ Settings
 
 ### Definition of done
 
-- [ ] Operator can find devices quickly
+- [x] Operator can find devices quickly in the implemented result view
 - [ ] Operator can run read-only checks safely
-- [ ] Operator can inspect command history
-- [ ] Operator can understand PowerShell errors
-- [ ] UI stays responsive with larger result sets
-- [ ] Read-only commands remain safe by default
+- [x] Operator can inspect redacted command history
+- [x] Operator receives structured, redacted PowerShell errors
+- [x] UI paginates larger returned device sets
+- [x] Read-only commands remain safe by default; only they may use cache
 
 ---
 

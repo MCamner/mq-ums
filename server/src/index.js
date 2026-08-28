@@ -5,9 +5,9 @@ require("dotenv").config({ path: require("path").resolve(__dirname, "../../.env"
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
-const { spawn } = require("child_process");
 const { validateConfig } = require("./validate-config");
-const { writeAuditEntry } = require("./audit");
+const { writeAuditEntry, readAuditHistory } = require("./audit");
+const { createCommandService } = require("./command-service");
 
 const HOST = process.env.MQ_UMS_BIND || "127.0.0.1";
 const PORT = parseInt(process.env.MQ_UMS_HTTP_PORT || "8787", 10);
@@ -33,12 +33,16 @@ const app = express();
 app.use(express.json());
 app.use(express.static(WEB_DIR));
 
-function requireApiKey(req, res, next) {
-  if (!API_KEY) return next();
-  const provided = req.headers["x-api-key"] || req.query.apiKey;
-  if (provided !== API_KEY) return res.status(401).json({ error: "Unauthorized" });
-  next();
+function createRequireApiKey(apiKey) {
+  return function requireApiKey(req, res, next) {
+    if (!apiKey) return next();
+    const provided = req.headers["x-api-key"];
+    if (provided !== apiKey) return res.status(401).json({ error: "Unauthorized" });
+    next();
+  };
 }
+
+const requireApiKey = createRequireApiKey(API_KEY);
 
 function healthPayload() {
   return {
@@ -59,10 +63,16 @@ app.get("/api/health", (req, res) => res.json(healthPayload()));
 // status emitted by the live validation harness, or an honest "unproven" view
 // synthesized from local config. The contract guarantees no secrets in the body.
 function umsStatusPayload() {
+  const apiDefaults = {
+    api_health_ok: false,
+    api_commands_ok: false,
+    api_run_ok: false,
+    audit_history_ok: false,
+  };
   try {
     const doc = JSON.parse(fs.readFileSync(STATUS_PATH, "utf8"));
     if (doc && doc.schema === "ums_connection_status.v1") {
-      return { ...doc, source: "mq-ums", emitted: true };
+      return { ...apiDefaults, ...doc, source: "mq-ums", emitted: true };
     }
   } catch {
     // No emitted status yet — fall through to the synthesized default.
@@ -85,6 +95,7 @@ function umsStatusPayload() {
     session_create_ok: false,
     session_remove_ok: false,
     get_status_ok: false,
+    ...apiDefaults,
     risk: "unknown",
     findings: ["Live UMS validation has not been run yet; run scripts/Test-LiveUmsValidation.ps1 -EmitStatus <path>"],
     emitted: false,
@@ -94,103 +105,35 @@ function umsStatusPayload() {
 app.get("/api/ums-status", requireApiKey, (req, res) => res.json(umsStatusPayload()));
 
 app.get("/api/commands", requireApiKey, (req, res) => {
-  const list = Array.from(commandMap.values()).map(({ id, name, section, description, allowedArgs, danger, confirmText }) => ({
+  const list = Array.from(commandMap.values()).map(({ id, name, section, description, allowedArgs, danger, confirmText, cacheTtlSeconds }) => ({
     id, name, description, allowedArgs, danger,
     ...(section ? { section } : {}),
     ...(confirmText ? { confirmText } : {}),
+    ...(cacheTtlSeconds ? { cacheTtlSeconds } : {}),
   }));
   res.json({ commands: list });
 });
 
-app.post("/api/run", requireApiKey, (req, res) => {
-  const { commandId, args = {}, confirmText, dryRun = false } = req.body;
+const commandService = createCommandService({
+  commandMap,
+  scriptsDir: SCRIPTS_DIR,
+  auditWriter: writeAuditEntry,
+});
+
+app.get("/api/history", requireApiKey, (req, res) => {
+  res.json(readAuditHistory(req.query.limit));
+});
+
+app.post("/api/run", requireApiKey, async (req, res) => {
+  const body = req.body && typeof req.body === "object" ? req.body : {};
+  const { commandId, args = {}, confirmText, dryRun = false, bypassCache = false } = body;
 
   if (!commandId || typeof commandId !== "string") {
     return res.status(400).json({ error: "Missing commandId" });
   }
 
-  const cmd = commandMap.get(commandId);
-  if (!cmd) {
-    return res.status(404).json({ error: `Unknown command: ${commandId}` });
-  }
-
-  if (cmd.danger && !dryRun) {
-    if (confirmText !== cmd.confirmText) {
-      return res.status(400).json({ error: `Dangerous command requires confirmText: "${cmd.confirmText}"` });
-    }
-  }
-
-  // Validate args — only allowlisted keys, string values only
-  const filteredArgs = {};
-  for (const key of cmd.allowedArgs) {
-    if (args[key] !== undefined) {
-      const val = String(args[key]);
-      if (!/^[\w\s.,@:/\\-]{0,256}$/.test(val)) {
-        return res.status(400).json({ error: `Unsafe value for arg '${key}'` });
-      }
-      filteredArgs[key] = val;
-    }
-  }
-
-  if (dryRun) {
-    writeAuditEntry({
-      commandId,
-      psCommand: cmd.psCommand,
-      args: filteredArgs,
-      dangerous: cmd.danger,
-      dryRun: true,
-      status: "dry-run",
-    });
-    return res.json({
-      ok: true,
-      dryRun: true,
-      preview: {
-        command: cmd.psCommand,
-        args: filteredArgs,
-      },
-    });
-  }
-
-  const scriptPath = path.join(SCRIPTS_DIR, "Invoke-UmsCommand.ps1");
-  const argsJson = JSON.stringify(filteredArgs);
-  const start = Date.now();
-
-  const ps = spawn("pwsh", [
-    "-NonInteractive",
-    "-NoProfile",
-    "-File", scriptPath,
-    "-CommandId", cmd.id,
-    "-PsCommand", cmd.psCommand,
-    "-ArgsJson", argsJson,
-    "-UmsHost", process.env.MQ_UMS_HOST || "",
-    "-UmsPort", process.env.MQ_UMS_PORT || "8443",
-    "-CredPath", process.env.MQ_UMS_CRED_PATH || "",
-  ], { timeout: 30000 });
-
-  let stdout = "";
-  let stderr = "";
-  ps.stdout.on("data", (d) => { stdout += d.toString(); });
-  ps.stderr.on("data", (d) => { stderr += d.toString(); });
-
-  ps.on("close", (code) => {
-    const durationMs = Date.now() - start;
-    if (code !== 0) {
-      writeAuditEntry({ commandId, psCommand: cmd.psCommand, args: filteredArgs, dangerous: cmd.danger, dryRun: false, status: "error", durationMs });
-      return res.status(500).json({ error: "PowerShell runner failed", stderr: stderr.trim(), code });
-    }
-    writeAuditEntry({ commandId, psCommand: cmd.psCommand, args: filteredArgs, dangerous: cmd.danger, dryRun: false, status: "success", durationMs });
-    try {
-      const result = JSON.parse(stdout);
-      res.json({ ok: true, result });
-    } catch {
-      res.json({ ok: true, raw: stdout.trim(), stderr: stderr.trim() });
-    }
-  });
-
-  ps.on("error", (err) => {
-    writeAuditEntry({ commandId, psCommand: cmd.psCommand, args: filteredArgs, dangerous: cmd.danger, dryRun: false, status: "spawn-error" });
-    res.status(500).json({ error: `Failed to spawn PowerShell: ${err.message}` });
-  });
+  const result = await commandService.execute({ commandId, args, confirmText, dryRun, bypassCache });
+  return res.status(result.httpStatus).json(result.body);
 });
 
 if (require.main === module) {
@@ -201,4 +144,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { app };
+module.exports = { app, createRequireApiKey };

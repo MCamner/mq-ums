@@ -36,6 +36,12 @@ function validateConfig(configPath = CONFIG_PATH) {
     }
     if (typeof cmd.danger !== "boolean") throw new Error(`Command '${cmd.id}' missing 'danger' boolean`);
     if (cmd.danger && !cmd.confirmText) throw new Error(`Command '${cmd.id}' is danger but missing 'confirmText'`);
+    if (cmd.cacheTtlSeconds !== undefined) {
+      if (cmd.danger) throw new Error(`Command '${cmd.id}' is danger and cannot be cached`);
+      if (!Number.isInteger(cmd.cacheTtlSeconds) || cmd.cacheTtlSeconds < 1 || cmd.cacheTtlSeconds > 3600) {
+        throw new Error(`Command '${cmd.id}' has invalid cacheTtlSeconds`);
+      }
+    }
 
     // Only allow safe characters in psCommand to prevent injection
     if (!/^[A-Za-z]+-[A-Za-z]+$/.test(cmd.psCommand)) {
