@@ -1,0 +1,13 @@
+{
+  "schema": "ums_command_result.v1",
+  "request_id": "example-request-1",
+  "command_id": "get-status",
+  "section": "Status",
+  "safety": "read-only",
+  "dry_run": false,
+  "status": "success",
+  "started_at": "2026-08-28T00:00:00Z",
+  "duration_ms": 125,
+  "source": "live",
+  "data": {"status": "available"}
+}

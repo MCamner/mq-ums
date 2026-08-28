@@ -16,6 +16,9 @@
 
 .EXAMPLE
     .\scripts\Test-LiveUmsValidation.ps1 -EmitStatus .\out\ums_connection_status.v1.json
+
+.EXAMPLE
+    .\scripts\Test-LiveUmsValidation.ps1 -ViaApi -ApiKey $env:MQ_UMS_API_KEY -EmitStatus .\out\ums_connection_status.v1.json
 #>
 [CmdletBinding()]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
@@ -25,6 +28,9 @@ param(
     [string] $UmsHost = $env:MQ_UMS_HOST,
     [string] $UmsPort = $(if ($env:MQ_UMS_PORT) { $env:MQ_UMS_PORT } else { "8443" }),
     [string] $CredPath = $env:MQ_UMS_CRED_PATH,
+    [switch] $ViaApi,
+    [string] $ApiBase = "http://127.0.0.1:8787",
+    [string] $ApiKey = $env:MQ_UMS_API_KEY,
 
     # Optional path to write a machine-readable ums_connection_status.v1 JSON.
     # The emitted file contains only booleans, a timestamp and generic finding
@@ -50,8 +56,13 @@ $Status = [ordered]@{
     session_create_ok   = $false
     session_remove_ok   = $false
     get_status_ok       = $false
+    api_health_ok       = $false
+    api_commands_ok     = $false
+    api_run_ok          = $false
+    audit_history_ok    = $false
 }
 $Findings = @()
+$ApiRequestIds = @()
 
 function Pass($Label) {
     Write-Host "[PASS] $Label" -ForegroundColor Green
@@ -86,6 +97,23 @@ function Check($Label, [scriptblock] $Block, $Key) {
 }
 
 function Invoke-MqUmsCommand($CommandId, $PsCommand, $CommandArgs = @{}) {
+    if ($ViaApi) {
+        $Headers = @{}
+        if ($ApiKey) { $Headers['x-api-key'] = $ApiKey }
+        $Body = @{
+            commandId   = $CommandId
+            args        = $CommandArgs
+            dryRun      = $false
+            bypassCache = $true
+        } | ConvertTo-Json -Depth 5
+        $Response = Invoke-RestMethod -Method Post -Uri "$ApiBase/api/run" `
+            -Headers $Headers -ContentType "application/json" -Body $Body
+        if ($Response.schema -ne "ums_command_result.v1" -or $Response.source -ne "live") {
+            throw "API returned an unexpected command result contract"
+        }
+        $script:ApiRequestIds += "$($Response.request_id)"
+        return $Response.data
+    }
     $ArgsJson = $CommandArgs | ConvertTo-Json -Compress
     & $Runner `
         -CommandId $CommandId `
@@ -147,6 +175,25 @@ Check "UMS session create/remove" {
 Write-Host ""
 Write-Host "[check] live read-only commands"
 
+if ($ViaApi) {
+    Check "Node API health" {
+        $Headers = @{}
+        if ($ApiKey) { $Headers['x-api-key'] = $ApiKey }
+        $Response = Invoke-RestMethod -Uri "$ApiBase/api/health" -Headers $Headers
+        if (-not $Response.ok) { throw "API health is not OK" }
+    } "api_health_ok"
+    Check "Node API command catalog" {
+        $Headers = @{}
+        if ($ApiKey) { $Headers['x-api-key'] = $ApiKey }
+        $Response = Invoke-RestMethod -Uri "$ApiBase/api/commands" -Headers $Headers
+        if (-not $Response.commands -or $Response.commands.Count -lt 1) {
+            throw "API returned no commands"
+        }
+    } "api_commands_ok"
+}
+
+$ApiRunFailuresBefore = $Fail
+
 Check "Get-UMSStatus" {
     Invoke-MqUmsCommand "get-status" "Get-UMSStatus"
 } "get_status_ok"
@@ -157,6 +204,22 @@ Check "Get-UMSFirmware" {
 
 Check "Get-UMSDevice" {
     Invoke-MqUmsCommand "get-device" "Get-UMSDevice"
+}
+
+if ($ViaApi) {
+    $Status['api_run_ok'] = ($Fail -eq $ApiRunFailuresBefore -and $ApiRequestIds.Count -eq 3)
+    Check "API audit history correlates all live requests" {
+        $Headers = @{}
+        if ($ApiKey) { $Headers['x-api-key'] = $ApiKey }
+        $History = Invoke-RestMethod -Uri "$ApiBase/api/history?limit=20" -Headers $Headers
+        if ($History.schema -ne "ums_command_history.v1") {
+            throw "API returned an unexpected history contract"
+        }
+        $HistoryIds = @($History.entries | ForEach-Object { "$($_.request_id)" })
+        foreach ($RequestId in $ApiRequestIds) {
+            if ($RequestId -notin $HistoryIds) { throw "Live request missing from audit history" }
+        }
+    } "audit_history_ok"
 }
 
 Write-Host ""
@@ -204,6 +267,10 @@ if ($EmitStatus) {
         session_create_ok   = [bool] $Status['session_create_ok']
         session_remove_ok   = [bool] $Status['session_remove_ok']
         get_status_ok       = [bool] $Status['get_status_ok']
+        api_health_ok       = [bool] $Status['api_health_ok']
+        api_commands_ok     = [bool] $Status['api_commands_ok']
+        api_run_ok          = [bool] $Status['api_run_ok']
+        audit_history_ok    = [bool] $Status['audit_history_ok']
         risk                = $(if ($AllOk) { "low" } else { "unknown" })
         findings            = @($Findings)
     }

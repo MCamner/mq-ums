@@ -9,6 +9,10 @@
   "session_create_ok": false,
   "session_remove_ok": false,
   "get_status_ok": false,
+  "api_health_ok": false,
+  "api_commands_ok": false,
+  "api_run_ok": false,
+  "audit_history_ok": false,
   "risk": "unknown",
   "findings": [
     "Live UMS validation has not been run against a real server yet"

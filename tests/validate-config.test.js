@@ -74,6 +74,26 @@ test("throws on danger=true without confirmText", () => {
   );
 });
 
+test("throws when a dangerous command enables cache", () => {
+  assert.throws(
+    () => validateConfig(writeTmp({ commands: [{
+      id: "x", psCommand: "Restart-UMSDevice", allowedArgs: [], danger: true,
+      confirmText: "RUN", cacheTtlSeconds: 30,
+    }] })),
+    /cannot be cached/,
+  );
+});
+
+test("throws on invalid cache TTL", () => {
+  assert.throws(
+    () => validateConfig(writeTmp({ commands: [{
+      id: "x", psCommand: "Get-UMSStatus", allowedArgs: [], danger: false,
+      cacheTtlSeconds: 0,
+    }] })),
+    /invalid cacheTtlSeconds/,
+  );
+});
+
 test("throws on duplicate id", () => {
   assert.throws(
     () => validateConfig(writeTmp({ commands: [

@@ -42,6 +42,16 @@ but this plan adds no cross-repo dependency.
   record. A successful live server call is user-reported but not reproducible
   from committed repo evidence yet.
 
+## Implementation status — 2026-08-28
+
+- Tasks 1–6 are implemented and covered by the static test and release gates.
+- Task 7 is implemented as a reproducible `-ViaApi` validation path.
+- The Windows live gate has not been run against a real UMS server. Until its
+  redacted status artifact exists, `release-check.sh` reports this as a warning
+  and the final live acceptance criterion remains open.
+- The command-contract parity test is implemented as a portable Python
+  validator plus Node regression tests instead of a shell-only test wrapper.
+
 ## Target flow
 
 ```text

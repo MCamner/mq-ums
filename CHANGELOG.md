@@ -2,7 +2,26 @@
 
 ## [Unreleased]
 
+### Added
+
+* Versioned `ums_command_result.v1` and redacted `ums_command_history.v1`
+  contracts with correlated request IDs.
+* Shared Node command service, authenticated `/api/history`, bounded read-only
+  cache and cache/live/dry-run source reporting.
+* Governed browser device search, pagination, result detail, command history
+  and redacted copy-summary flow.
+* CI/release validation that all 30 YAML command contracts match the runtime
+  allowlist.
+* `Test-LiveUmsValidation.ps1 -ViaApi` for proving the complete Node API to UMS
+  path and correlated audit history on Windows.
+
 ### Changed
+
+* API-key authentication is header-only; querystring keys are no longer
+  accepted.
+* Audit rows retain argument names but no argument values or raw UMS results.
+* Release readiness reports missing, stale or incomplete live UMS evidence as
+  an explicit warning.
 
 * `release-check.sh` now conforms to the `repo_release_check.v1` contract:
   `--json` emits the machine-readable verdict (`schema`, `repo`, `status`,

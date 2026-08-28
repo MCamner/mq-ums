@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mq.local/schemas/ums_command_history.v1.json",
+  "title": "Redacted UMS command history",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "generated_at", "entries"],
+  "properties": {
+    "schema": {"const": "ums_command_history.v1"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "request_id", "command_id", "section", "safety", "dry_run",
+          "status", "started_at", "duration_ms", "source", "arg_names"
+        ],
+        "properties": {
+          "request_id": {"type": "string", "minLength": 1},
+          "command_id": {"type": "string", "minLength": 1},
+          "section": {"type": "string", "minLength": 1},
+          "safety": {"enum": ["read-only", "dangerous"]},
+          "dry_run": {"type": "boolean"},
+          "status": {"enum": ["success", "error", "dry-run"]},
+          "started_at": {"type": "string", "format": "date-time"},
+          "duration_ms": {"type": "integer", "minimum": 0},
+          "source": {"enum": ["live", "cache", "dry-run"]},
+          "cache_origin_request_id": {"type": "string", "minLength": 1},
+          "arg_names": {
+            "type": "array",
+            "items": {"type": "string", "pattern": "^[A-Za-z]\\w{0,63}$"}
+          },
+          "error_code": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  }
+}

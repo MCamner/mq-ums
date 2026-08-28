@@ -26,9 +26,11 @@ done
 : "$DRY_RUN"
 
 BLOCKERS=()
+WARNINGS=()
 say()  { [[ "$JSON" -eq 1 ]] || echo "$1"; }
 ok()   { [[ "$JSON" -eq 1 ]] || echo "OK:   $1"; }
 fail() { BLOCKERS+=("$1"); [[ "$JSON" -eq 1 ]] || echo "FAIL: $1" >&2; }
+warn() { WARNINGS+=("$1"); [[ "$JSON" -eq 1 ]] || echo "WARN: $1" >&2; }
 
 run() {
   local label="$1"; shift
@@ -46,6 +48,7 @@ say "=== mq-ums release-check v${VERSION} ==="
 say ""
 say "--- Config ---"
 run "commands.json validates" node "$ROOT/server/src/validate-config.js"
+run "command contracts match commands.json" python3 "$ROOT/tools/validate-command-contracts.py"
 
 say ""
 say "--- Tests ---"
@@ -90,20 +93,52 @@ else
   fail "scripts/Test-LiveUmsValidation.ps1 missing"
 fi
 
+STATUS_PATH="${MQ_UMS_STATUS_PATH:-$ROOT/out/ums_connection_status.v1.json}"
+if [[ ! -f "$STATUS_PATH" ]]; then
+  warn "live UMS API evidence missing; run Test-LiveUmsValidation.ps1 -ViaApi -EmitStatus"
+else
+  LIVE_WARNING="$(python3 - "$STATUS_PATH" <<'PY'
+import datetime as dt
+import json
+import sys
+from pathlib import Path
+
+try:
+    doc = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8-sig"))
+    if doc.get("schema") != "ums_connection_status.v1":
+        raise ValueError("wrong schema")
+    generated = dt.datetime.fromisoformat(doc["generated_at"].replace("Z", "+00:00"))
+    age = dt.datetime.now(dt.timezone.utc) - generated
+    required = ("api_health_ok", "api_commands_ok", "api_run_ok", "audit_history_ok")
+    if age < dt.timedelta(0) or age > dt.timedelta(days=30):
+        print("live UMS API evidence is stale")
+    elif doc.get("risk") != "low" or not all(doc.get(key) is True for key in required):
+        print("live UMS API evidence does not prove the integrated path")
+except Exception:
+    print("live UMS API evidence is invalid")
+PY
+)"
+  if [[ -n "$LIVE_WARNING" ]]; then warn "$LIVE_WARNING"; else ok "live UMS API evidence is current"; fi
+fi
+
 if [[ "$JSON" -eq 1 ]]; then
   status=READY
   [[ "${#BLOCKERS[@]}" -gt 0 ]] && status=BLOCKED
-  python3 - "$status" "$VERSION" ${BLOCKERS[@]+"${BLOCKERS[@]}"} <<'PY'
+  python3 - "$status" "$VERSION" "${#BLOCKERS[@]}" \
+    ${BLOCKERS[@]+"${BLOCKERS[@]}"} ${WARNINGS[@]+"${WARNINGS[@]}"} <<'PY'
 import json
 import sys
 
-status, version, *blockers = sys.argv[1:]
+status, version, blocker_count, *items = sys.argv[1:]
+blocker_count = int(blocker_count)
+blockers = items[:blocker_count]
+warnings = items[blocker_count:]
 print(json.dumps({
     "schema": "repo_release_check.v1",
     "repo": "mq-ums",
     "status": status,
     "blockers": blockers,
-    "warnings": [],
+    "warnings": warnings,
     "evidence": {"version": version},
 }))
 PY
@@ -112,7 +147,11 @@ fi
 
 say ""
 if [[ "${#BLOCKERS[@]}" -eq 0 ]]; then
-  echo "=== All checks passed — ready to release v${VERSION} ==="
+  if [[ "${#WARNINGS[@]}" -gt 0 ]]; then
+    echo "=== All blocking checks passed — ${#WARNINGS[@]} warning(s) remain ==="
+  else
+    echo "=== All checks passed — ready to release v${VERSION} ==="
+  fi
 else
   echo "=== ${#BLOCKERS[@]} check(s) failed — fix before releasing ===" >&2
   exit 1

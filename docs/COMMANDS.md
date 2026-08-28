@@ -2,6 +2,9 @@
 
 All commands are driven by `config/commands.json`. No raw PowerShell is executed from the browser — every command must be in this allowlist and every arg value is validated before being passed to PowerShell.
 
+Read-only entries may declare a bounded `cacheTtlSeconds`. Dangerous entries
+must not declare cache metadata; config validation rejects that combination.
+
 Dangerous commands require typing **`RUN`** in the confirmation field. All executions are written to `logs/audit-YYYY-MM-DD.jsonl`.
 
 ---

@@ -9,11 +9,11 @@ hostnames, or device data.
 
 ## How it is produced
 
-This contract is **not** a new connection path. It is emitted by the existing
-live validation flow:
+This contract is emitted by the live validation flow. The integrated proof uses
+the same Node API as the governed browser:
 
 ```powershell
-.\scripts\Test-LiveUmsValidation.ps1 -EmitStatus .\out\ums_connection_status.v1.json
+.\scripts\Test-LiveUmsValidation.ps1 -ViaApi -EmitStatus .\out\ums_connection_status.v1.json
 ```
 
 The validation script connects the same way the Node API does — through PSIGEL
@@ -21,6 +21,8 @@ and a DPAPI credential file — so the status reflects the real architecture:
 
 ```text
 Test-LiveUmsValidation.ps1
+  → Node API (/api/run and /api/history)
+  → Invoke-UmsCommand.ps1
   → PSIGEL (New-UMSAPICookie / Get-UMSStatus / Remove-UMSAPICookie)
   → IGEL UMS
 ```
@@ -41,6 +43,10 @@ No write commands are ever issued. See [LIVE_UMS_VALIDATION.md](../LIVE_UMS_VALI
 | `session_create_ok`   | bool      | `New-UMSAPICookie` succeeded. |
 | `session_remove_ok`   | bool      | `Remove-UMSAPICookie` succeeded (clean teardown). |
 | `get_status_ok`       | bool      | `Get-UMSStatus` returned. |
+| `api_health_ok`       | bool      | The Node API health endpoint returned OK. |
+| `api_commands_ok`     | bool      | The governed command catalog was available through the API. |
+| `api_run_ok`          | bool      | All three live read-only commands passed through `/api/run`. |
+| `audit_history_ok`    | bool      | Every live API request was present in redacted history. |
 | `risk`                | string    | `low` when the read-only path is fully proven, else `unknown`. |
 | `findings`            | string[]  | Human-readable notes; failed checks are listed here. |
 
