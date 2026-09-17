@@ -6,6 +6,8 @@ Local web UI for managing IGEL UMS via [PSIGEL](https://github.com/MCamner/PSIGE
 ![Version](https://img.shields.io/badge/version-0.1.4-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
+[Documentation](https://mcamner.github.io/mq-ums/)
+
 ```text
 Browser UI → Node.js API → PowerShell → PSIGEL → IGEL UMS
 ```
@@ -68,6 +70,8 @@ Result:  command runs only after explicit confirmation
 ---
 
 ## Demo
+
+![mq-ums browser command](docs/screenshots/browser-command.svg)
 
 On a Windows management host with UMS access:
 
@@ -174,6 +178,7 @@ See [ROADMAP.md](ROADMAP.md).
 
 ## Documentation
 
+- [GitHub Pages](https://mcamner.github.io/mq-ums/)
 - [Command reference](docs/COMMANDS.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Security](docs/SECURITY.md)

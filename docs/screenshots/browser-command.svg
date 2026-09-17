@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" role="img" aria-labelledby="title desc">
+  <title id="title">mq-ums browser command</title>
+  <desc id="desc">Browser-style screenshot of mq-ums showing a safe read-only UMS command.</desc>
+  <rect width="960" height="540" fill="#101014"/>
+  <rect x="54" y="48" width="852" height="444" rx="12" fill="#17171d" stroke="#f0b35a" stroke-width="3"/>
+  <text x="92" y="104" fill="#f0b35a" font-family="JetBrains Mono, Menlo, monospace" font-size="28">mq-ums</text>
+  <rect x="92" y="140" width="360" height="54" rx="6" fill="#22232b" stroke="#55515f"/>
+  <text x="116" y="175" fill="#f4f1e8" font-family="JetBrains Mono, Menlo, monospace" font-size="22">Get-UMSStatus</text>
+  <rect x="92" y="232" width="776" height="156" rx="6" fill="#0f1117" stroke="#55515f"/>
+  <text x="120" y="276" fill="#7ee787" font-family="JetBrains Mono, Menlo, monospace" font-size="22">{ "status": "ok", "server": "redacted" }</text>
+  <text x="120" y="328" fill="#9cdcfe" font-family="JetBrains Mono, Menlo, monospace" font-size="22">read-only command, no confirmation required</text>
+  <text x="92" y="442" fill="#f4f1e8" font-family="JetBrains Mono, Menlo, monospace" font-size="22">Audit log: logs/audit-YYYY-MM-DD.jsonl</text>
+</svg>
