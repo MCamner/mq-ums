@@ -24,7 +24,7 @@ STEPS = {
 CI_COMMANDS = {
     "ci.yml": ["server/src/validate-config.js", "tools/validate-command-contracts.py",
                "npm test", "./scripts/check-skills.sh", 'require(\'./package.json\').version',
-               "version-${VERSION}", "[${VERSION}]", "v${VERSION}"],
+               "version-${VERSION}", "CHANGELOG.md", "v${VERSION}"],
     "gate-parity.yml": ["python3 scripts/check-gate-parity.py", "--self-test",
                         "./release-check.sh --json"],
 }
