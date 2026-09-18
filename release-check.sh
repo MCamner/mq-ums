@@ -8,6 +8,8 @@
 #   `stack release --all --preflight`.
 # --dry-run is accepted for contract compatibility; this check is already
 #   read-only, so it is a no-op.
+# scripts/check-gate-parity.py declares CI-only markdownlint and tag publication;
+# READY does not claim those CI-only workflows ran locally.
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
@@ -53,6 +55,11 @@ run "command contracts match commands.json" python3 "$ROOT/tools/validate-comman
 say ""
 say "--- Tests ---"
 run "npm test" npm test --silent
+
+say ""
+say "--- Agent discovery and gate parity ---"
+run "check-skills.sh" bash "$ROOT/scripts/check-skills.sh"
+run "check-gate-parity.py" python3 "$ROOT/scripts/check-gate-parity.py"
 
 say ""
 say "--- Version sync ---"
