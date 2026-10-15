@@ -2,7 +2,8 @@
 
 ## Known Blockers
 
-* No repo-specific blocker exported in this Phase 4 seed.
+* Live PSIGEL, UMS, DPAPI and TLS behaviour can only be verified on a Windows management host.
+* One further blocker is tracked locally and is not published.
 
 ## Check Before Acting
 
